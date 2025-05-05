@@ -19,6 +19,10 @@ interface VendorApplication {
   businessTypeLabel: string;
   description: string;
   serviceArea: string;
+  // Add the missing properties that are used in mock data
+  name?: string;
+  email?: string;
+  date?: string;
   // Other fields relevant to the application
 }
 
