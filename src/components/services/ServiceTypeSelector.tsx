@@ -16,7 +16,6 @@ interface ServiceTypeCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
-  color: string;
   onClick: () => void;
 }
 
@@ -24,20 +23,19 @@ const ServiceTypeCard: React.FC<ServiceTypeCardProps> = ({
   icon, 
   title, 
   description, 
-  color, 
   onClick 
 }) => {
   return (
     <div 
-      className={`bg-white rounded-xl p-6 cursor-pointer transform transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-lg border-2 border-${color}/20 hover:border-${color}/50`}
+      className="bg-white rounded-lg p-5 cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-sm hover:shadow-md border border-gray-100 hover:border-barrio-blue/30"
       onClick={onClick}
     >
-      <div className="flex items-start mb-4">
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 bg-${color}/10 text-${color}`}>
+      <div className="flex items-start">
+        <div className="w-12 h-12 rounded-lg flex items-center justify-center mr-4 bg-gray-50 text-barrio-blue">
           {icon}
         </div>
         <div>
-          <h3 className="text-lg font-medium mb-1">{title}</h3>
+          <h3 className="text-base font-medium text-gray-800 mb-1">{title}</h3>
           <p className="text-sm text-gray-500">{description}</p>
         </div>
       </div>
@@ -59,69 +57,60 @@ const ServiceTypeSelector: React.FC = () => {
       id: 'plumbing', 
       title: 'Plomería', 
       description: 'Reparación de tuberías, instalaciones y más',
-      icon: <Wrench className="w-6 h-6" />, 
-      color: 'barrio-blue'
+      icon: <Wrench className="w-6 h-6" />
     },
     { 
       id: 'electrical', 
       title: 'Servicios Eléctricos', 
       description: 'Instalaciones, reparaciones eléctricas',
-      icon: <Plug className="w-6 h-6" />, 
-      color: 'barrio-accent'
+      icon: <Plug className="w-6 h-6" />
     },
     { 
       id: 'tech', 
       title: 'Servicios Técnicos', 
       description: 'Reparación de PC, formateo, instalación de software',
-      icon: <Briefcase className="w-6 h-6" />, 
-      color: 'barrio-primary'
+      icon: <Briefcase className="w-6 h-6" />
     },
     { 
       id: 'education', 
       title: 'Clases Particulares', 
       description: 'Matemáticas, idiomas, ciencias y más',
-      icon: <School className="w-6 h-6" />, 
-      color: 'barrio-pink'
+      icon: <School className="w-6 h-6" />
     },
     { 
       id: 'copying', 
       title: 'Servicios de Copia', 
       description: 'Fotocopias, impresiones, escaneos',
-      icon: <Copy className="w-6 h-6" />, 
-      color: 'barrio-purple'
+      icon: <Copy className="w-6 h-6" />
     },
     { 
       id: 'writing', 
       title: 'Trabajos Escritos', 
       description: 'Elaboración de documentos y trabajos',
-      icon: <Pen className="w-6 h-6" />, 
-      color: 'barrio-orange'
+      icon: <Pen className="w-6 h-6" />
     },
     { 
       id: 'home', 
       title: 'Servicios del Hogar', 
       description: 'Limpieza, jardinería y mantenimiento',
-      icon: <Store className="w-6 h-6" />, 
-      color: 'barrio-green'
+      icon: <Store className="w-6 h-6" />
     },
     { 
       id: 'food', 
       title: 'Comida Casera', 
       description: 'Preparación de comidas y catering',
-      icon: <Utensils className="w-6 h-6" />, 
-      color: 'barrio-dark'
+      icon: <Utensils className="w-6 h-6" />
     }
   ];
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
       {serviceTypes.map((type) => (
         <ServiceTypeCard
           key={type.id}
           icon={type.icon}
           title={type.title}
           description={type.description}
-          color={type.color}
           onClick={() => handleSelectType(type.id)}
         />
       ))}

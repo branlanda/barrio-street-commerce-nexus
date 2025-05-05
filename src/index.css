@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,64 +8,64 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 200 20% 96%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 200 20% 96%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 200 20% 96%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 174 100% 37%; /* Teal */
+    --primary: 201 94% 37%; /* Blue */
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 343 100% 64%; /* Pink */
+    --secondary: 346 100% 58%; /* Pink */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 40 100% 70%; /* Yellow */
-    --accent-foreground: 210 40% 98%;
+    --accent: 35 92% 65%; /* Yellow */
+    --accent-foreground: 222 47% 11%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 174 100% 37%;
+    --ring: 201 94% 37%;
 
-    --radius: 0.75rem;
+    --radius: 0.6rem;
   }
 
   .dark {
-    --background: 200 33% 24%;
+    --background: 222 47% 11%;
     --foreground: 210 40% 98%;
 
-    --card: 200 33% 24%;
+    --card: 222 47% 11%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 200 33% 24%;
+    --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 174 100% 37%;
+    --primary: 201 94% 37%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 343 100% 64%;
+    --secondary: 346 100% 58%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 40 100% 70%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 35 92% 65%;
+    --accent-foreground: 222 47% 11%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 174 100% 37%;
+    --ring: 201 94% 37%;
   }
 }
 
@@ -79,14 +79,18 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display;
+    @apply font-display font-bold text-gray-800;
+  }
+  
+  p {
+    @apply text-gray-700 leading-relaxed;
   }
 }
 
 /* Market-inspired custom components */
 @layer components {
   .market-card {
-    @apply bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow duration-300;
+    @apply bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-300;
   }
   
   .vendor-badge {
@@ -94,28 +98,28 @@
   }
 
   .vendor-badge-verified {
-    @apply bg-barrio-primary bg-opacity-10 text-barrio-primary;
+    @apply bg-barrio-blue bg-opacity-10 text-barrio-blue;
   }
   
   .category-pill {
     @apply px-4 py-2 rounded-full text-sm font-medium transition-colors;
   }
 
-  /* New vibrant components */
+  /* New modern components */
   .barrio-gradient-bg {
-    @apply bg-gradient-to-br from-barrio-pink via-barrio-blue to-barrio-primary;
+    @apply bg-gradient-to-br from-barrio-blue via-barrio-primary to-barrio-secondary;
   }
 
   .barrio-card {
-    @apply rounded-xl shadow-lg border-2 border-white/20 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1;
+    @apply rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300 hover:-translate-y-0.5;
   }
 
   .barrio-button {
-    @apply rounded-full font-medium transition-all duration-300 transform hover:scale-105 active:scale-95;
+    @apply rounded-md font-medium transition-all duration-300 hover:translate-y-[-1px] active:translate-y-0;
   }
 
-  .vibrant-shadow {
-    @apply shadow-lg hover:shadow-xl transition-shadow;
+  .modern-shadow {
+    @apply shadow-sm hover:shadow-md transition-shadow;
   }
 }
 
@@ -129,6 +133,6 @@
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-6px);
   }
 }

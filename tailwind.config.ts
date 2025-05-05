@@ -13,7 +13,7 @@ export default {
 	theme: {
 		container: {
 			center: true,
-			padding: '2rem',
+			padding: '1.5rem',
 			screens: {
 				'2xl': '1400px'
 			}
@@ -63,26 +63,30 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Barrio Market Custom Colors
+				// Barrio Market Custom Colors - Updated for better readability
 				barrio: {
-					'primary': '#00BFB3', // Teal (updated from green)
-					'primary-dark': '#00A69B', // Darker teal
-					'secondary': '#FF4778', // Pink (updated from orange)
-					'accent': '#FFD166', // Yellow (updated from previous orange)
-					'neutral': '#F5F5F5',
-					'dark': '#264653',
-					// New vibrant colors based on the reference images
-					'pink': '#FF4778', // Bright pink
-					'blue': '#23B5D3', // Bright blue
-					'purple': '#8338EC', // Purple
-					'orange': '#FF9E44', // Orange
-					'green': '#34D399', // Bright green
+					'primary': '#1492C3', // Blue
+					'primary-dark': '#0F7CAB', // Darker blue
+					'secondary': '#FF3366', // Pink
+					'accent': '#FFB82B', // Yellow
+					'neutral': '#F9FAFB',
+					'dark': '#1A1F2C',
+					// Updated vibrant colors with better contrast
+					'blue': '#1492C3', // Primary blue
+					'pink': '#FF3366', // Vibrant pink
+					'purple': '#7C3AED', // Purple
+					'orange': '#F97316', // Orange
+					'green': '#10B981', // Green
 				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			fontFamily: {
+				sans: ['Inter', 'sans-serif'],
+				display: ['Manrope', 'sans-serif']
 			},
 			keyframes: {
 				'accordion-down': {
@@ -113,23 +117,19 @@ export default {
 				},
 				'pulse-subtle': {
 					'0%, 100%': { opacity: '1' },
-					'50%': { opacity: '0.8' }
+					'50%': { opacity: '0.85' }
 				},
 				'float': {
 					'0%, 100%': { transform: 'translateY(0)' },
-					'50%': { transform: 'translateY(-10px)' }
+					'50%': { transform: 'translateY(-6px)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.5s ease-out',
+				'fade-in': 'fade-in 0.4s ease-out',
 				'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
 				'float': 'float 3s ease-in-out infinite'
-			},
-			fontFamily: {
-				sans: ['Nunito', 'sans-serif'],
-				display: ['Poppins', 'sans-serif']
 			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
