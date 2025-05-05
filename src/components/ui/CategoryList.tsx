@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { categories } from '@/lib/mockData';
-import { Apple, PaintBrush, Utensils, Shirt, Leaf, Flower } from 'lucide-react';
+import { Apple, Paintbrush, Utensils, Shirt, Leaf, Flower } from 'lucide-react';
 
 const getCategoryIcon = (iconName: string) => {
   switch (iconName) {
     case 'apple':
       return <Apple size={18} />;
     case 'paintbrush':
-      return <PaintBrush size={18} />;
+      return <Paintbrush size={18} />;
     case 'utensils':
       return <Utensils size={18} />;
     case 'shirt':
