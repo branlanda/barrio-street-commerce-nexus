@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -23,11 +23,90 @@ import {
   Star, 
   Clock,
   CheckCircle,
-  XCircle
+  XCircle,
+  Loader2
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const AdminDashboard = () => {
+  const { getVendorApplications } = useAuth();
+  const { toast } = useToast();
+  const [recentApplications, setRecentApplications] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Stats data - would come from API in a real app
+  const stats = {
+    totalUsers: 2482,
+    newUsers: 180,
+    userGrowth: "12%",
+    vendors: 384,
+    newVendors: 28,
+    vendorGrowth: "8%",
+    pendingApplications: 18,
+    avgApplicationTime: "1.5 días",
+    reviews: 4126,
+    avgRating: "4.2 estrellas",
+    reviewGrowth: "5%"
+  };
+
+  useEffect(() => {
+    // Load recent applications when component mounts
+    loadRecentApplications();
+  }, []);
+
+  const loadRecentApplications = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getVendorApplications();
+      // Sort by date (newest first) and take only the first 4
+      const sortedData = [...data].sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ).slice(0, 4);
+      
+      setRecentApplications(sortedData);
+    } catch (error) {
+      console.error("Error loading applications:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudieron cargar las solicitudes recientes.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return (
+          <Badge className="bg-amber-500">
+            <Clock className="h-3 w-3 mr-1" />
+            Pendiente
+          </Badge>
+        );
+      case 'approved':
+        return (
+          <Badge className="bg-green-500">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Aprobado
+          </Badge>
+        );
+      case 'rejected':
+        return (
+          <Badge className="bg-red-500">
+            <XCircle className="h-3 w-3 mr-1" />
+            Rechazado
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -39,99 +118,89 @@ const AdminDashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard 
           title="Usuarios Totales"
-          value="2,482"
-          description="+180 en el último mes"
+          value={stats.totalUsers.toString()}
+          description={`+${stats.newUsers} en el último mes`}
           icon={<Users className="h-5 w-5" />}
-          trend={"+12%"}
+          trend={`+${stats.userGrowth}`}
           trendUp={true}
         />
         <StatsCard 
           title="Vendedores"
-          value="384"
-          description="+28 en el último mes"
+          value={stats.vendors.toString()}
+          description={`+${stats.newVendors} en el último mes`}
           icon={<Store className="h-5 w-5" />}
-          trend={"+8%"}
+          trend={`+${stats.vendorGrowth}`}
           trendUp={true}
         />
         <StatsCard 
           title="Solicitudes Pendientes"
-          value="18"
-          description="Tiempo promedio 1.5 días"
+          value={stats.pendingApplications.toString()}
+          description={`Tiempo promedio ${stats.avgApplicationTime}`}
           icon={<ClipboardList className="h-5 w-5" />}
         />
         <StatsCard 
           title="Reseñas"
-          value="4,126"
-          description="Promedio 4.2 estrellas"
+          value={stats.reviews.toString()}
+          description={`Promedio ${stats.avgRating}`}
           icon={<Star className="h-5 w-5" />}
-          trend={"+5%"}
+          trend={`+${stats.reviewGrowth}`}
           trendUp={true}
         />
       </div>
       
       {/* Recent Applications */}
       <Card>
-        <CardHeader>
-          <CardTitle>Solicitudes Recientes de Vendedores</CardTitle>
-          <CardDescription>Las solicitudes más recientes que requieren revisión.</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <div>
+            <CardTitle>Solicitudes Recientes de Vendedores</CardTitle>
+            <CardDescription>Las solicitudes más recientes que requieren revisión.</CardDescription>
+          </div>
+          <Button 
+            variant="ghost" 
+            onClick={() => loadRecentApplications()}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : null}
+            Actualizar
+          </Button>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Usuario</TableHead>
-                <TableHead>Tipo de Negocio</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Estado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">Carlos Mendez</TableCell>
-                <TableCell>Vendedor de Alimentos</TableCell>
-                <TableCell>05/05/2025</TableCell>
-                <TableCell>
-                  <Badge className="bg-amber-500">
-                    <Clock className="h-3 w-3 mr-1" />
-                    Pendiente
-                  </Badge>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Laura Torres</TableCell>
-                <TableCell>Artesanías</TableCell>
-                <TableCell>04/05/2025</TableCell>
-                <TableCell>
-                  <Badge className="bg-amber-500">
-                    <Clock className="h-3 w-3 mr-1" />
-                    Pendiente
-                  </Badge>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Miguel Díaz</TableCell>
-                <TableCell>Servicios</TableCell>
-                <TableCell>02/05/2025</TableCell>
-                <TableCell>
-                  <Badge className="bg-green-500">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Aprobado
-                  </Badge>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Ana Gómez</TableCell>
-                <TableCell>Electrónicos</TableCell>
-                <TableCell>30/04/2025</TableCell>
-                <TableCell>
-                  <Badge className="bg-red-500">
-                    <XCircle className="h-3 w-3 mr-1" />
-                    Rechazado
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+          {isLoading && recentApplications.length === 0 ? (
+            <div className="flex justify-center items-center h-32">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Usuario</TableHead>
+                  <TableHead>Tipo de Negocio</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Estado</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentApplications.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                      No hay solicitudes recientes
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  recentApplications.map((application) => (
+                    <TableRow key={application.id}>
+                      <TableCell className="font-medium">{application.name}</TableCell>
+                      <TableCell>{application.businessTypeLabel}</TableCell>
+                      <TableCell>{application.date}</TableCell>
+                      <TableCell>{getStatusBadge(application.status)}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
       

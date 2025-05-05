@@ -20,6 +20,18 @@ const AdminPanel = () => {
   // Default to dashboard if no section specified
   const currentSection = section || 'dashboard';
   
+  // Ensure section is valid, redirect to dashboard if not
+  React.useEffect(() => {
+    const validSections = [
+      'dashboard', 'vendors', 'users', 'categories', 
+      'coupons', 'reviews', 'orders', 'export', 'settings'
+    ];
+    
+    if (!validSections.includes(currentSection)) {
+      navigate('/admin/dashboard');
+    }
+  }, [currentSection, navigate]);
+  
   const renderSection = () => {
     switch (currentSection) {
       case 'dashboard':
@@ -41,7 +53,6 @@ const AdminPanel = () => {
       case 'settings':
         return <AdminSettings />;
       default:
-        navigate('/admin/dashboard');
         return <AdminDashboard />;
     }
   };

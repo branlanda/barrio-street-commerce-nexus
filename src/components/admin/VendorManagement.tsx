@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -22,7 +22,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   CheckCircle, 
@@ -31,68 +30,12 @@ import {
   Clock,
   Edit,
   Ban,
-  Eye
+  Eye,
+  Loader2
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import SearchPanel from './SearchPanel';
-
-// Mock vendor application data
-const mockApplications = [
-  { 
-    id: '1', 
-    name: 'Carlos Mendez', 
-    email: 'carlos@example.com',
-    businessType: 'food_vendor', 
-    businessTypeLabel: 'Vendedor de Alimentos',
-    description: 'Vendo comida casera y postres tradicionales.',
-    serviceArea: 'Centro de la ciudad',
-    date: '05/05/2025', 
-    status: 'pending'
-  },
-  { 
-    id: '2', 
-    name: 'Laura Torres', 
-    email: 'laura@example.com',
-    businessType: 'crafts',
-    businessTypeLabel: 'Artesanías',
-    description: 'Artesanías hechas a mano, principalmente de madera y tejidos.',
-    serviceArea: 'Todo el barrio norte',
-    date: '04/05/2025', 
-    status: 'pending'
-  },
-  { 
-    id: '3', 
-    name: 'Miguel Díaz', 
-    email: 'miguel@example.com',
-    businessType: 'services',
-    businessTypeLabel: 'Servicios',
-    description: 'Ofrezco servicios de electricidad, plomería y carpintería.',
-    serviceArea: 'Sur de la ciudad, radio de 5km',
-    date: '02/05/2025', 
-    status: 'approved'
-  },
-  { 
-    id: '4', 
-    name: 'Ana Gómez', 
-    email: 'ana@example.com',
-    businessType: 'electronics',
-    businessTypeLabel: 'Electrónicos',
-    description: 'Vendo y reparo celulares y tablets.',
-    serviceArea: 'Todo el municipio',
-    date: '30/04/2025', 
-    status: 'rejected'
-  },
-  { 
-    id: '5', 
-    name: 'Jorge Ramírez', 
-    email: 'jorge@example.com',
-    businessType: 'clothing',
-    businessTypeLabel: 'Ropa y Accesorios',
-    description: 'Vendo ropa importada a precios accesibles.',
-    serviceArea: 'Centro comercial y alrededores',
-    date: '28/04/2025', 
-    status: 'pending'
-  },
-];
 
 // Mock vendor data
 const mockVendors = [
@@ -149,10 +92,37 @@ const mockVendors = [
 ];
 
 const VendorManagement = () => {
+  const { getVendorApplications, approveVendorApplication, rejectVendorApplication } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('applications');
+  const [applications, setApplications] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const { toast } = useToast();
   
+  useEffect(() => {
+    // Load applications when component mounts
+    loadApplications();
+  }, []);
+
+  const loadApplications = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getVendorApplications();
+      setApplications(data);
+    } catch (error) {
+      console.error("Error loading applications:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudieron cargar las solicitudes. Intente nuevamente.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
@@ -200,19 +170,81 @@ const VendorManagement = () => {
   };
 
   const handleSearchApplications = (query: string) => {
-    // In a real app, this would filter applications based on the query
     setSearchTerm(query);
   };
 
   const handleSearchVendors = (query: string) => {
-    // In a real app, this would filter vendors based on the query
     setSearchTerm(query);
   };
 
-  const filteredApplications = mockApplications.filter(app => 
-    app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    app.businessTypeLabel.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleApproveApplication = async (applicationId: string) => {
+    setProcessingId(applicationId);
+    try {
+      await approveVendorApplication(applicationId);
+      
+      // Update local state to reflect the change
+      setApplications(prevApplications => 
+        prevApplications.map(app => 
+          app.id === applicationId ? { ...app, status: 'approved' } : app
+        )
+      );
+      
+      if (selectedApplication?.id === applicationId) {
+        setSelectedApplication(prev => ({ ...prev, status: 'approved' }));
+      }
+      
+      toast({
+        title: "Solicitud aprobada",
+        description: "La solicitud de vendedor ha sido aprobada exitosamente",
+      });
+    } catch (error) {
+      console.error("Error approving application:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo aprobar la solicitud. Intente nuevamente.",
+      });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleRejectApplication = async (applicationId: string) => {
+    setProcessingId(applicationId);
+    try {
+      await rejectVendorApplication(applicationId);
+      
+      // Update local state to reflect the change
+      setApplications(prevApplications => 
+        prevApplications.map(app => 
+          app.id === applicationId ? { ...app, status: 'rejected' } : app
+        )
+      );
+      
+      if (selectedApplication?.id === applicationId) {
+        setSelectedApplication(prev => ({ ...prev, status: 'rejected' }));
+      }
+      
+      toast({
+        title: "Solicitud rechazada",
+        description: "La solicitud de vendedor ha sido rechazada",
+      });
+    } catch (error) {
+      console.error("Error rejecting application:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo rechazar la solicitud. Intente nuevamente.",
+      });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const filteredApplications = applications.filter(app => 
+    app.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    app.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    app.businessTypeLabel?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredVendors = mockVendors.filter(vendor => 
@@ -249,37 +281,52 @@ const VendorManagement = () => {
           
           <Card>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Usuario</TableHead>
-                    <TableHead>Tipo de Negocio</TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredApplications.map((application) => (
-                    <TableRow key={application.id}>
-                      <TableCell className="font-medium">{application.name}</TableCell>
-                      <TableCell>{application.businessTypeLabel}</TableCell>
-                      <TableCell>{application.date}</TableCell>
-                      <TableCell>{getStatusBadge(application.status)}</TableCell>
-                      <TableCell className="text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleViewApplication(application)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Ver
-                        </Button>
-                      </TableCell>
+              {isLoading ? (
+                <div className="flex justify-center items-center h-40">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Usuario</TableHead>
+                      <TableHead>Tipo de Negocio</TableHead>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredApplications.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                          No hay solicitudes que coincidan con tu búsqueda
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredApplications.map((application) => (
+                        <TableRow key={application.id}>
+                          <TableCell className="font-medium">{application.name}</TableCell>
+                          <TableCell>{application.businessTypeLabel}</TableCell>
+                          <TableCell>{application.date}</TableCell>
+                          <TableCell>{getStatusBadge(application.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleViewApplication(application)}
+                              disabled={processingId === application.id}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Ver
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
           
@@ -315,12 +362,28 @@ const VendorManagement = () => {
                 
                 {selectedApplication.status === 'pending' && (
                   <div className="flex justify-end gap-3">
-                    <Button variant="destructive">
-                      <XCircle className="h-4 w-4 mr-1" />
+                    <Button 
+                      variant="destructive"
+                      onClick={() => handleRejectApplication(selectedApplication.id)}
+                      disabled={processingId === selectedApplication.id}
+                    >
+                      {processingId === selectedApplication.id ? (
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      ) : (
+                        <XCircle className="h-4 w-4 mr-1" />
+                      )}
                       Rechazar
                     </Button>
-                    <Button className="bg-green-600 hover:bg-green-700">
-                      <CheckCircle className="h-4 w-4 mr-1" />
+                    <Button 
+                      className="bg-green-600 hover:bg-green-700"
+                      onClick={() => handleApproveApplication(selectedApplication.id)}
+                      disabled={processingId === selectedApplication.id}
+                    >
+                      {processingId === selectedApplication.id ? (
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      ) : (
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                      )}
                       Aprobar
                     </Button>
                   </div>
@@ -355,32 +418,40 @@ const VendorManagement = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredVendors.map((vendor) => (
-                    <TableRow key={vendor.id}>
-                      <TableCell className="font-medium">{vendor.name}</TableCell>
-                      <TableCell>{vendor.businessName}</TableCell>
-                      <TableCell>{vendor.type}</TableCell>
-                      <TableCell>{vendor.location}</TableCell>
-                      <TableCell>{vendor.rating}</TableCell>
-                      <TableCell>{getStatusBadge(vendor.status)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          {vendor.status === 'active' ? (
-                            <Button variant="ghost" size="sm">
-                              <Ban className="h-4 w-4" />
-                            </Button>
-                          ) : (
-                            <Button variant="ghost" size="sm">
-                              <CheckCircle className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
+                  {filteredVendors.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                        No hay vendedores que coincidan con tu búsqueda
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    filteredVendors.map((vendor) => (
+                      <TableRow key={vendor.id}>
+                        <TableCell className="font-medium">{vendor.name}</TableCell>
+                        <TableCell>{vendor.businessName}</TableCell>
+                        <TableCell>{vendor.type}</TableCell>
+                        <TableCell>{vendor.location}</TableCell>
+                        <TableCell>{vendor.rating}</TableCell>
+                        <TableCell>{getStatusBadge(vendor.status)}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            {vendor.status === 'active' ? (
+                              <Button variant="ghost" size="sm">
+                                <Ban className="h-4 w-4" />
+                              </Button>
+                            ) : (
+                              <Button variant="ghost" size="sm">
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
