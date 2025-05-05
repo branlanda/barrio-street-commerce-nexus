@@ -6,13 +6,15 @@ import { useAuth } from '@/contexts/AuthContext';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
+  requiredRole?: 'buyer' | 'vendor' | 'admin';
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  requireAuth = true 
+  requireAuth = true,
+  requiredRole
 }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, hasRole } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -27,6 +29,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (requireAuth && !isAuthenticated) {
     // Redirect to login if authentication is required but user is not authenticated
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (requiredRole && isAuthenticated && !hasRole(requiredRole)) {
+    // Redirect to unauthorized page if the user doesn't have the required role
+    return <Navigate to="/unauthorized" replace />;
   }
 
   if (!requireAuth && isAuthenticated) {

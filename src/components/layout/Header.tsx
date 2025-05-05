@@ -7,7 +7,10 @@ import {
   ShoppingBag, 
   User, 
   LogOut,
-  ChevronDown
+  ChevronDown,
+  Store,
+  Settings,
+  Shield
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,10 +19,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 
 const Header = () => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, hasRole } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -67,6 +71,30 @@ const Header = () => {
                   <User className="mr-2 h-4 w-4" />
                   <span>Mi perfil</span>
                 </DropdownMenuItem>
+                
+                {hasRole('buyer') && !hasRole('vendor') && (
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/vendor/become')}>
+                    <Store className="mr-2 h-4 w-4" />
+                    <span>Convertirme en vendedor</span>
+                  </DropdownMenuItem>
+                )}
+                
+                {hasRole('vendor') && (
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/vendor/dashboard')}>
+                    <Store className="mr-2 h-4 w-4" />
+                    <span>Mi tienda</span>
+                  </DropdownMenuItem>
+                )}
+                
+                {hasRole('admin') && (
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/admin')}>
+                    <Shield className="mr-2 h-4 w-4" />
+                    <span>Panel de Administración</span>
+                  </DropdownMenuItem>
+                )}
+                
+                <DropdownMenuSeparator />
+                
                 <DropdownMenuItem className="cursor-pointer" onClick={() => logout()}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Cerrar sesión</span>

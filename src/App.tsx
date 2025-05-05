@@ -11,7 +11,11 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import VendorRegister from "./pages/vendor/VendorRegister";
+import BecomeVendor from "./pages/vendor/BecomeVendor";
+import ApplicationStatus from "./pages/vendor/ApplicationStatus";
 import Profile from "./pages/Profile";
+import Unauthorized from "./pages/Unauthorized";
+import AdminPanel from "./pages/admin/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +45,30 @@ const App = () => (
                 <Profile />
               </ProtectedRoute>
             } />
+            <Route path="/vendor/become" element={
+              <ProtectedRoute>
+                <BecomeVendor />
+              </ProtectedRoute>
+            } />
+            <Route path="/vendor/application-status" element={
+              <ProtectedRoute>
+                <ApplicationStatus />
+              </ProtectedRoute>
+            } />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminPanel />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/:section" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminPanel />
+              </ProtectedRoute>
+            } />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
