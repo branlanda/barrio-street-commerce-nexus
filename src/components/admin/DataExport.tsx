@@ -1,145 +1,143 @@
 
-import React from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from '@/components/ui/button';
-import { 
-  FileDown, 
-  FileSpreadsheet, 
-  FileJson, 
-  Calendar,
-  Users,
-  MapPin,
-  Star,
-  BarChart
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Download, FileSpreadsheet, FileJson } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format } from 'date-fns';
 
 const DataExport = () => {
+  const [isExporting, setIsExporting] = useState<{[key: string]: boolean}>({
+    users: false,
+    vendors: false,
+    products: false,
+    orders: false,
+    geojson: false
+  });
+
+  const handleExport = async (dataType: string, fileFormat: 'csv' | 'json') => {
+    setIsExporting(prev => ({ ...prev, [dataType]: true }));
+    
+    try {
+      // Mock export process
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Create filename with timestamp
+      const timestamp = format(new Date(), 'yyyy-MM-dd-HHmm');
+      const filename = `barrio-market-${dataType}-${timestamp}.${fileFormat}`;
+      
+      // In a real app, this would fetch data from API and create a file
+      console.log(`Exporting ${dataType} as ${fileFormat} with filename: ${filename}`);
+      
+      // For demo purposes we'll just show how you might trigger a download
+      // In a real app, you'd create a blob and use it to download the file
+      const mockData = JSON.stringify({
+        exportType: dataType,
+        timestamp: new Date().toISOString(),
+        entries: []
+      });
+      
+      const blob = new Blob([mockData], { type: fileFormat === 'csv' ? 'text/csv' : 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      // If this were a real Storage system (e.g. browser's Storage API):
+      // localStorage.setItem('lastExport', new Date().toISOString());
+    } catch (error) {
+      console.error(`Error exporting ${dataType}:`, error);
+    } finally {
+      setIsExporting(prev => ({ ...prev, [dataType]: false }));
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Exportar Datos</h1>
-        <p className="text-muted-foreground">Exporta datos anonimizados en diferentes formatos.</p>
-      </div>
-      
-      <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-6">
-        <p className="text-amber-800 text-sm">
-          <strong>Nota:</strong> Todos los datos exportados son anonimizados para proteger la privacidad de los usuarios.
-          Solo se incluyen datos agregados o despersonalizados.
-        </p>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <ExportCard
-          title="Datos de Vendedores"
-          description="Información anonimizada sobre vendedores, categorías y ubicaciones."
-          icon={<Store className="h-8 w-8" />}
-          csvAvailable={true}
-          jsonAvailable={true}
-          geojsonAvailable={true}
-        />
-        
-        <ExportCard
-          title="Estadísticas de Usuarios"
-          description="Datos agregados sobre usuarios, comportamientos y tendencias."
-          icon={<Users className="h-8 w-8" />}
-          csvAvailable={true}
-          jsonAvailable={true}
-        />
-        
-        <ExportCard
-          title="Datos Geográficos"
-          description="Información sobre áreas de servicio y densidad de vendedores."
-          icon={<MapPin className="h-8 w-8" />}
-          csvAvailable={true}
-          geojsonAvailable={true}
-        />
-        
-        <ExportCard
-          title="Análisis de Reseñas"
-          description="Datos agregados sobre reseñas, puntuaciones y feedback."
-          icon={<Star className="h-8 w-8" />}
-          csvAvailable={true}
-          jsonAvailable={true}
-        />
-        
-        <ExportCard
-          title="Estadísticas Mensuales"
-          description="Reporte mensual con métricas clave de la plataforma."
-          icon={<Calendar className="h-8 w-8" />}
-          csvAvailable={true}
-        />
-        
-        <ExportCard
-          title="Tendencias de Mercado"
-          description="Análisis de tendencias y patrones en categorías de vendedores."
-          icon={<BarChart className="h-8 w-8" />}
-          csvAvailable={true}
-          jsonAvailable={true}
-        />
-      </div>
-    </div>
-  );
-};
-
-interface ExportCardProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  csvAvailable?: boolean;
-  jsonAvailable?: boolean;
-  geojsonAvailable?: boolean;
-}
-
-const ExportCard: React.FC<ExportCardProps> = ({
-  title,
-  description,
-  icon,
-  csvAvailable,
-  jsonAvailable,
-  geojsonAvailable
-}) => {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between">
-          <CardTitle>{title}</CardTitle>
-          <div className="h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center">
-            {icon}
-          </div>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Exportar Datos</h2>
+          <p className="text-muted-foreground">
+            Exporta datos anonimizados del marketplace para análisis.
+          </p>
         </div>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-gray-500 mb-2">Exportar como:</p>
-      </CardContent>
-      <CardFooter className="flex justify-start gap-2 pt-0">
-        {csvAvailable && (
-          <Button variant="outline" size="sm">
-            <FileSpreadsheet className="h-4 w-4 mr-1" />
-            CSV
-          </Button>
-        )}
-        {jsonAvailable && (
-          <Button variant="outline" size="sm">
-            <FileJson className="h-4 w-4 mr-1" />
-            JSON
-          </Button>
-        )}
-        {geojsonAvailable && (
-          <Button variant="outline" size="sm">
-            <FileDown className="h-4 w-4 mr-1" />
-            GeoJSON
-          </Button>
-        )}
-      </CardFooter>
-    </Card>
+      </div>
+
+      <Tabs defaultValue="tabular">
+        <TabsList className="mb-4">
+          <TabsTrigger value="tabular">Datos Tabulares</TabsTrigger>
+          <TabsTrigger value="geo">Datos Geoespaciales</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="tabular" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              {id: 'users', name: 'Usuarios'},
+              {id: 'vendors', name: 'Vendedores'},
+              {id: 'products', name: 'Productos'},
+              {id: 'orders', name: 'Pedidos'},
+              {id: 'reviews', name: 'Reseñas'}
+            ].map(dataset => (
+              <Card key={dataset.id}>
+                <CardHeader>
+                  <CardTitle className="text-lg">{dataset.name}</CardTitle>
+                  <CardDescription>
+                    Datos de {dataset.name.toLowerCase()} anonimizados
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleExport(dataset.id, 'csv')}
+                    disabled={isExporting[dataset.id]}
+                  >
+                    <FileSpreadsheet className="mr-1 h-4 w-4" />
+                    {isExporting[dataset.id] ? 'Exportando...' : 'CSV'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleExport(dataset.id, 'json')}
+                    disabled={isExporting[dataset.id]}
+                  >
+                    <FileJson className="mr-1 h-4 w-4" />
+                    {isExporting[dataset.id] ? 'Exportando...' : 'JSON'}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="geo" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Datos GeoJSON</CardTitle>
+              <CardDescription>
+                Exporta la ubicación de vendedores y áreas de servicio
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                onClick={() => handleExport('geojson', 'json')}
+                disabled={isExporting.geojson}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                {isExporting.geojson ? 'Exportando...' : 'Exportar GeoJSON'}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

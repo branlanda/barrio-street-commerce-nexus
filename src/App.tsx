@@ -17,6 +17,8 @@ import Profile from "./pages/Profile";
 import Unauthorized from "./pages/Unauthorized";
 import AdminPanel from "./pages/admin/AdminPanel";
 import NotFound from "./pages/NotFound";
+import VendorListPage from "./pages/vendors/VendorListPage";
+import ServiceListPage from "./pages/services/ServiceListPage";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,8 @@ const App = () => (
                 <Profile />
               </ProtectedRoute>
             } />
+            <Route path="/vendors" element={<VendorListPage />} />
+            <Route path="/services" element={<ServiceListPage />} />
             <Route path="/vendor/become" element={
               <ProtectedRoute>
                 <BecomeVendor />

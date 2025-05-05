@@ -1,15 +1,19 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useToast } from "@/hooks/use-toast";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+// Define user roles
+type UserRole = 'buyer' | 'vendor' | 'admin';
+
+// Define user interface
 interface User {
   id: string;
-  email: string;
   name: string;
-  role: 'buyer' | 'vendor' | 'admin';
-  isVendor: boolean; // Keeping for backward compatibility
+  email: string;
+  roles: UserRole[];
+  avatar?: string;
 }
 
+// Define vendor application interface
 interface VendorApplication {
   id: string;
   userId: string;
@@ -18,229 +22,245 @@ interface VendorApplication {
   serviceArea: string;
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
+  images?: string[];
 }
 
+// Define auth context interface
 interface AuthContextType {
   user: User | null;
+  isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  isAuthenticated: boolean;
-  applyForVendor: (application: Omit<VendorApplication, 'id' | 'userId' | 'status' | 'createdAt'>) => Promise<void>;
-  hasRole: (role: 'buyer' | 'vendor' | 'admin') => boolean;
-  pendingVendorApplication: VendorApplication | null;
+  hasRole: (role: UserRole) => boolean;
+  submitVendorApplication: (application: Omit<VendorApplication, "id" | "userId" | "status" | "createdAt">) => Promise<void>;
+  getVendorApplication: () => Promise<VendorApplication | null>;
 }
 
+// Create auth context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+// Auth provider props interface
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+// Mock users for development
+const mockUsers = [
+  {
+    id: '1',
+    name: 'John Doe',
+    email: 'user@example.com',
+    password: 'password',
+    roles: ['buyer'] as UserRole[],
+    avatar: 'https://ui-avatars.com/api/?name=John+Doe'
+  },
+  {
+    id: '2',
+    name: 'Vendor User',
+    email: 'vendor@example.com',
+    password: 'password',
+    roles: ['buyer', 'vendor'] as UserRole[],
+    avatar: 'https://ui-avatars.com/api/?name=Vendor+User'
+  },
+  {
+    id: '3',
+    name: 'Admin User',
+    email: 'admin@example.com',
+    password: 'password',
+    roles: ['buyer', 'admin'] as UserRole[],
+    avatar: 'https://ui-avatars.com/api/?name=Admin+User'
+  }
+];
+
+// Mock vendor applications
+const mockVendorApplications: VendorApplication[] = [
+  {
+    id: '1',
+    userId: '1',
+    businessType: 'Frutas y Verduras',
+    description: 'Venta de frutas y verduras frescas directamente de la finca',
+    serviceArea: 'Ciudad Norte, Centro',
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    images: ['https://example.com/image1.jpg']
+  }
+];
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [pendingVendorApplication, setPendingVendorApplication] = useState<VendorApplication | null>(null);
-  const { toast } = useToast();
-
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  
+  // Check if user is already logged in on component mount
   useEffect(() => {
-    // Check for stored user in localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error("Failed to parse stored user:", error);
-        localStorage.removeItem('user');
+    const checkAuth = async () => {
+      const storedUser = localStorage.getItem('user');
+      
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error('Error parsing stored user:', error);
+          localStorage.removeItem('user');
+        }
       }
-    }
+      
+      setIsLoading(false);
+    };
     
-    // Check for pending vendor application
-    const storedApplication = localStorage.getItem('vendorApplication');
-    if (storedApplication) {
-      try {
-        setPendingVendorApplication(JSON.parse(storedApplication));
-      } catch (error) {
-        console.error("Failed to parse stored application:", error);
-        localStorage.removeItem('vendorApplication');
-      }
-    }
-    
-    setIsLoading(false);
+    checkAuth();
   }, []);
-
-  const login = async (email: string, password: string) => {
+  
+  // Login function
+  const login = async (email: string, password: string): Promise<void> => {
+    setIsLoading(true);
+    
     try {
-      setIsLoading(true);
-      // Mock login - in a real app, this would be an API call
-      if (email && password) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Create mock user for development
-        let role: 'buyer' | 'vendor' | 'admin' = 'buyer';
-        
-        // For testing purposes, set specific roles based on email
-        if (email === 'admin@barrio.com') {
-          role = 'admin';
-        } else if (email === 'vendor@barrio.com') {
-          role = 'vendor';
-        }
-        
-        const mockUser = {
-          id: '1',
-          email,
-          name: email.split('@')[0],
-          role,
-          isVendor: role === 'vendor',
-        };
-        
-        setUser(mockUser);
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        
-        // Check for pending vendor application for this user
-        const storedApp = localStorage.getItem('vendorApplications');
-        if (storedApp) {
-          const apps = JSON.parse(storedApp);
-          const userApp = apps.find((app: VendorApplication) => app.userId === mockUser.id && app.status === 'pending');
-          if (userApp) {
-            setPendingVendorApplication(userApp);
-          }
-        }
-        
-        toast({
-          title: "Inicio de sesión exitoso",
-          description: "Bienvenido/a de vuelta.",
-        });
-      } else {
-        throw new Error("Correo o contraseña inválidos");
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Find user by email
+      const foundUser = mockUsers.find(u => u.email === email);
+      
+      // Check if user exists and password is correct
+      if (!foundUser || foundUser.password !== password) {
+        throw new Error('Invalid email or password');
       }
-    } catch (error: any) {
-      toast({
-        title: "Error de inicio de sesión",
-        description: error.message || "No se pudo iniciar sesión. Intenta nuevamente.",
-        variant: "destructive",
-      });
+      
+      // Exclude password from user object
+      const { password: _, ...userWithoutPassword } = foundUser;
+      
+      // Set user in state
+      setUser(userWithoutPassword);
+      
+      // Store user in localStorage
+      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      
+    } catch (error) {
+      console.error('Login error:', error);
       throw error;
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const register = async (email: string, password: string, name: string) => {
-    try {
-      setIsLoading(true);
-      // Mock registration - in a real app, this would be an API call
-      if (email && password && name) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Create mock user for development
-        const mockUser = {
-          id: Date.now().toString(),
-          email,
-          name,
-          role: 'buyer' as const,
-          isVendor: false
-        };
-        
-        setUser(mockUser);
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        toast({
-          title: "Registro exitoso",
-          description: "Bienvenido/a a Barrio Market.",
-        });
-      } else {
-        throw new Error("Por favor completa todos los campos");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error de registro",
-        description: error.message || "No se pudo completar el registro. Intenta nuevamente.",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = () => {
-    setUser(null);
-    setPendingVendorApplication(null);
-    localStorage.removeItem('user');
-    toast({
-      title: "Cierre de sesión",
-      description: "Has cerrado sesión correctamente.",
-    });
   };
   
-  const applyForVendor = async (application: Omit<VendorApplication, 'id' | 'userId' | 'status' | 'createdAt'>) => {
+  // Register function
+  const register = async (name: string, email: string, password: string): Promise<void> => {
+    setIsLoading(true);
+    
     try {
-      if (!user) throw new Error("Debes iniciar sesión para aplicar");
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Check if user already exists
+      const existingUser = mockUsers.find(u => u.email === email);
       
+      if (existingUser) {
+        throw new Error('User already exists');
+      }
+      
+      // Create new user
+      const newUser = {
+        id: `${mockUsers.length + 1}`,
+        name,
+        email,
+        password,
+        roles: ['buyer'] as UserRole[],
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`
+      };
+      
+      // Add user to mockUsers (in a real app, this would be an API call)
+      mockUsers.push(newUser);
+      
+      // Exclude password from user object
+      const { password: _, ...userWithoutPassword } = newUser;
+      
+      // Set user in state
+      setUser(userWithoutPassword);
+      
+      // Store user in localStorage
+      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Logout function
+  const logout = (): void => {
+    setUser(null);
+    localStorage.removeItem('user');
+  };
+  
+  // Check if user has a specific role
+  const hasRole = (role: UserRole): boolean => {
+    if (!user) return false;
+    return user.roles.includes(role);
+  };
+
+  // Submit vendor application
+  const submitVendorApplication = async (application: Omit<VendorApplication, "id" | "userId" | "status" | "createdAt">): Promise<void> => {
+    if (!user) throw new Error('User must be logged in to submit an application');
+    
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Create new vendor application
       const newApplication: VendorApplication = {
-        ...application,
-        id: Date.now().toString(),
+        id: `${mockVendorApplications.length + 1}`,
         userId: user.id,
+        ...application,
         status: 'pending',
         createdAt: new Date().toISOString()
       };
       
-      // Store in localStorage for development
-      let applications = [];
-      const storedApps = localStorage.getItem('vendorApplications');
+      // Add application to mockVendorApplications (in a real app, this would be an API call)
+      mockVendorApplications.push(newApplication);
       
-      if (storedApps) {
-        applications = JSON.parse(storedApps);
-      }
+      // In a real app, this would update the backend
+      console.log('Vendor application submitted:', newApplication);
+    } catch (error) {
+      console.error('Error submitting vendor application:', error);
+      throw error;
+    }
+  };
+
+  // Get vendor application
+  const getVendorApplication = async (): Promise<VendorApplication | null> => {
+    if (!user) return null;
+    
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      applications.push(newApplication);
-      localStorage.setItem('vendorApplications', JSON.stringify(applications));
+      // Find application by user ID
+      const application = mockVendorApplications.find(app => app.userId === user.id);
       
-      setPendingVendorApplication(newApplication);
-      
-      toast({
-        title: "Solicitud enviada",
-        description: "Tu solicitud para ser vendedor ha sido enviada y está en revisión.",
-      });
-      
-      return newApplication;
-    } catch (error: any) {
-      toast({
-        title: "Error al enviar solicitud",
-        description: error.message || "No se pudo enviar tu solicitud. Intenta nuevamente.",
-        variant: "destructive",
-      });
+      return application || null;
+    } catch (error) {
+      console.error('Error getting vendor application:', error);
       throw error;
     }
   };
   
-  const hasRole = (role: 'buyer' | 'vendor' | 'admin') => {
-    if (!user) return false;
-    
-    // Admin has all permissions
-    if (user.role === 'admin') return true;
-    
-    // Vendor has vendor and buyer permissions
-    if (user.role === 'vendor' && (role === 'vendor' || role === 'buyer')) return true;
-    
-    // Buyer only has buyer permissions
-    return user.role === role;
-  };
-
   return (
     <AuthContext.Provider 
       value={{ 
         user, 
+        isAuthenticated: !!user, 
         isLoading, 
         login, 
         register, 
-        logout, 
-        isAuthenticated: !!user,
-        applyForVendor,
+        logout,
         hasRole,
-        pendingVendorApplication
+        submitVendorApplication,
+        getVendorApplication
       }}
     >
       {children}
@@ -248,10 +268,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
+  
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
+  
   return context;
 };

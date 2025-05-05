@@ -1,181 +1,217 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from 'sonner';
 
+import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/layout/Header';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import Footer from '@/components/layout/Footer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/form';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Store, MapPin, Upload } from 'lucide-react';
 
-const applicationSchema = z.object({
-  businessType: z.string().min(1, { message: "Selecciona un tipo de negocio" }),
-  description: z.string().min(20, { message: "La descripción debe tener al menos 20 caracteres" }),
-  serviceArea: z.string().min(5, { message: "Indica tu área de servicio" }),
+// Form schema
+const formSchema = z.object({
+  businessType: z.string().min(3, {
+    message: 'Tipo de negocio debe tener al menos 3 caracteres',
+  }),
+  description: z.string().min(10, {
+    message: 'La descripción debe tener al menos 10 caracteres',
+  }),
+  serviceArea: z.string().min(3, {
+    message: 'Área de servicio debe tener al menos 3 caracteres',
+  }),
 });
 
-type ApplicationFormValues = z.infer<typeof applicationSchema>;
-
-const businessTypes = [
-  { value: "food_vendor", label: "Vendedor de Alimentos" },
-  { value: "electronics", label: "Electrónicos" },
-  { value: "services", label: "Servicios (Plomería, Electricidad, etc.)" },
-  { value: "clothing", label: "Ropa y Accesorios" },
-  { value: "crafts", label: "Artesanías" },
-  { value: "other", label: "Otro" },
-];
+type FormValues = z.infer<typeof formSchema>;
 
 const BecomeVendor = () => {
-  const { applyForVendor, pendingVendorApplication } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
-
-  const form = useForm<ApplicationFormValues>({
-    resolver: zodResolver(applicationSchema),
+  const { submitVendorApplication } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       businessType: '',
       description: '',
       serviceArea: '',
     },
   });
-
-  const onSubmit = async (data: ApplicationFormValues) => {
+  
+  const onSubmit = async (data: FormValues) => {
+    setIsSubmitting(true);
+    
     try {
-      await applyForVendor(data);
+      // Submit application with required fields
+      await submitVendorApplication({
+        businessType: data.businessType,
+        description: data.description,
+        serviceArea: data.serviceArea
+      });
+      
+      toast.success('¡Solicitud enviada con éxito!');
       navigate('/vendor/application-status');
     } catch (error) {
-      // Error already handled in auth context
+      console.error('Error al enviar solicitud:', error);
+      toast.error('Error al enviar la solicitud. Intenta nuevamente.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-  // If the user already has a pending application, show the status instead
-  if (pendingVendorApplication) {
-    navigate('/vendor/application-status');
-    return null;
-  }
-
+  
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <div className="container mx-auto max-w-2xl py-8 px-4">
-        <div className="space-y-6">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold">Conviértete en Vendedor</h1>
-            <p className="text-gray-500 mt-2">
-              Completa el formulario a continuación para solicitar tu cuenta de vendedor
+      
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <div className="max-w-3xl mx-auto">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-barrio-dark mb-2">Conviértete en Vendedor</h1>
+            <p className="text-gray-600">
+              Completa el formulario para comenzar a vender tus productos o servicios en Barrio Market.
             </p>
           </div>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="businessType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Negocio</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecciona el tipo de negocio" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {businessTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descripción del Negocio</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Describe qué vendes, servicios que ofreces, etc." 
-                        className="min-h-[120px]" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="serviceArea"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Área de Servicio</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          placeholder="Ej: Centro de la ciudad, Barrio Norte, etc."
-                          className="pl-10"
-                          {...field}
-                        />
+          
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Store className="h-5 w-5 text-barrio-primary" />
+                Detalles de tu Negocio
+              </CardTitle>
+              <CardDescription>
+                Cuéntanos sobre tu negocio para que podamos revisar tu solicitud.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="businessType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de Negocio</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ej: Frutas y Verduras, Servicios de Plomería..." {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Selecciona la categoría que mejor describa tu negocio.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descripción</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Describe tu negocio, productos o servicios que ofreces..." 
+                            className="min-h-32"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Detalla qué vendes o qué servicios ofreces.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="serviceArea"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Área de Servicio</FormLabel>
+                        <FormControl>
+                          <div className="flex items-center">
+                            <Input placeholder="Ej: Norte de Bogotá, Centro de Medellín..." {...field} />
+                            <Button 
+                              type="button" 
+                              size="icon" 
+                              variant="ghost"
+                              className="ml-2"
+                              onClick={() => alert('Función de mapa próximamente')}
+                            >
+                              <MapPin className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Indica dónde ofreces tus productos o servicios.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div>
+                    <div className="mb-2 flex justify-between items-center">
+                      <div>
+                        <h3 className="text-sm font-medium">Imágenes (Opcional)</h3>
+                        <p className="text-xs text-gray-500">
+                          Añade fotos de tus productos o servicios.
+                        </p>
                       </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="border border-dashed border-gray-300 rounded-lg p-6">
-                <div className="flex flex-col items-center justify-center space-y-2">
-                  <Upload className="h-8 w-8 text-gray-400" />
-                  <p className="text-sm text-gray-500">
-                    Arrastra imágenes o documentos relevantes para tu solicitud (opcional)
-                  </p>
-                  <Button type="button" variant="outline" size="sm" className="mt-2">
-                    Seleccionar archivos
-                  </Button>
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full bg-barrio-primary hover:bg-barrio-primary-dark">
-                Enviar Solicitud
-              </Button>
-            </form>
-          </Form>
-
-          <div className="text-center text-sm text-gray-500">
-            <p>Tu solicitud será revisada por nuestro equipo. Te notificaremos cuando sea aprobada.</p>
-          </div>
+                      <Button type="button" variant="outline" size="sm">
+                        <Upload className="h-4 w-4 mr-2" /> Subir
+                      </Button>
+                    </div>
+                    
+                    <div className="border border-dashed border-gray-300 rounded-md p-8 text-center">
+                      <p className="text-sm text-gray-500">
+                        Arrastra y suelta imágenes aquí o haz clic en 'Subir'
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 flex justify-end">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="mr-2"
+                      onClick={() => navigate('/')}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="bg-barrio-primary hover:bg-barrio-primary-dark"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Enviando...' : 'Enviar Solicitud'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-    </>
+      </main>
+      
+      <Footer />
+    </div>
   );
 };
 

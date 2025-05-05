@@ -21,19 +21,19 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
           <Search className="h-5 w-5 text-gray-400" />
         </div>
         <input
           type="search"
-          className="block w-full p-3 pl-10 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-barrio-primary focus:border-barrio-primary outline-none"
+          className="block w-full p-4 pl-12 text-sm rounded-full bg-white shadow-md focus:outline-none focus:ring-2 focus:ring-barrio-pink border-none"
           placeholder={placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
         <button
           type="submit"
-          className="absolute inset-y-0 right-0 flex items-center px-4 text-white bg-barrio-primary rounded-r-lg hover:bg-barrio-primary-dark"
+          className="absolute right-2.5 inset-y-2 px-6 rounded-full text-white font-medium bg-gradient-to-r from-barrio-pink to-barrio-secondary hover:opacity-90 transition-opacity"
         >
           Buscar
         </button>
