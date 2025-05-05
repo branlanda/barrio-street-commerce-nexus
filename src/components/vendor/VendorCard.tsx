@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Star, Check } from 'lucide-react';
-import { Vendor } from '@/lib/mockData';
+import { Vendor } from '@/types/supabase';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 
@@ -15,7 +15,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
       <div className="market-card group h-full flex flex-col overflow-hidden">
         <div className="h-40 bg-gradient-to-br from-yellow-100 to-orange-100 relative">
           <img 
-            src={vendor.coverImage || '/placeholder.svg'} 
+            src={vendor.cover_image || '/placeholder.svg'} 
             alt={vendor.name} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -23,7 +23,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
           <div className="absolute bottom-0 left-0 w-full p-3">
             <h3 className="text-white font-display font-semibold text-lg">{vendor.name}</h3>
           </div>
-          {vendor.isVerified && (
+          {vendor.is_verified && (
             <Badge variant="secondary" className="absolute top-3 right-3 bg-white text-barrio-orange flex items-center gap-1 shadow-sm">
               <Check size={12} /> Verificado
             </Badge>
@@ -42,7 +42,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
               <Star className="h-4 w-4 fill-barrio-orange stroke-barrio-orange mr-1" />
               <span className="font-medium">{vendor.rating}</span>
             </div>
-            <span className="text-gray-500 text-sm ml-1">({vendor.reviewCount} reseñas)</span>
+            <span className="text-gray-500 text-sm ml-1">({vendor.review_count} reseñas)</span>
           </div>
         </div>
       </div>

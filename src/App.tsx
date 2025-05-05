@@ -22,7 +22,14 @@ import ServiceListPage from "./pages/services/ServiceListPage";
 import VendorDetail from "./pages/vendor/VendorDetail";
 import VendorManage from "./pages/vendor/VendorManage";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

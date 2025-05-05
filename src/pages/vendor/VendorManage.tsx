@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { PenLine, Plus, Trash2, Check, X, Settings } from 'lucide-react';
+import { PenLine, Plus, Trash2, Check, X, Settings, Upload } from 'lucide-react';
 
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -16,10 +15,27 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { vendors, products } from '@/lib/mockData';
+import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogFooter,
+  DialogDescription
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,66 +48,32 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+import { useVendor, useUpdateVendor } from '@/api/vendors';
+import { useVendorProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/api/products';
+import { useCategories } from '@/api/categories';
+import { supabase } from '@/lib/supabase';
+import { formatCurrency } from '@/lib/mockData';
+
 const VendorManage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   
-  // Fetch vendor data
-  const { data: vendor, isLoading: isLoadingVendor } = useQuery({
-    queryKey: ['vendor', id],
-    queryFn: async () => {
-      // This would be a real API call in production
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const foundVendor = vendors.find(v => v.id === id);
-      if (!foundVendor) throw new Error('Vendor not found');
-      return foundVendor;
-    }
-  });
+  // Fetch vendor data from Supabase
+  const { data: vendor, isLoading: isLoadingVendor } = useVendor(id);
   
-  // Fetch vendor products
-  const { data: vendorProducts, isLoading: isLoadingProducts } = useQuery({
-    queryKey: ['vendor-products', id],
-    queryFn: async () => {
-      // This would be a real API call in production
-      await new Promise(resolve => setTimeout(resolve, 700));
-      return products.filter(product => product.vendorId === id);
-    },
-    enabled: !!vendor,
-  });
+  // Fetch vendor products from Supabase
+  const { data: vendorProducts, isLoading: isLoadingProducts } = useVendorProducts(id);
   
-  // Mock update profile mutation
-  const updateProfileMutation = useMutation({
-    mutationFn: async (profileData: any) => {
-      // This would make a real API call in production
-      console.log('Updating profile with:', profileData);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return { success: true };
-    },
-    onSuccess: () => {
-      toast({
-        title: "Perfil actualizado",
-        description: "Tu perfil de vendedor ha sido actualizado exitosamente",
-      });
-    },
-  });
+  // Fetch categories for product creation
+  const { data: categories, isLoading: isLoadingCategories } = useCategories();
   
-  // Mock delete product mutation
-  const deleteProductMutation = useMutation({
-    mutationFn: async (productId: string) => {
-      // This would make a real API call in production
-      console.log('Deleting product:', productId);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      return { success: true };
-    },
-    onSuccess: () => {
-      toast({
-        title: "Producto eliminado",
-        description: "El producto ha sido eliminado exitosamente",
-      });
-    },
-  });
+  // Mutations for vendor and products
+  const updateVendorMutation = useUpdateVendor();
+  const createProductMutation = useCreateProduct();
+  const updateProductMutation = useUpdateProduct();
+  const deleteProductMutation = useDeleteProduct();
   
   // Form states
   const [profileForm, setProfileForm] = useState({
@@ -101,14 +83,29 @@ const VendorManage = () => {
     hours: '',
   });
   
+  // Product form states
+  const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any | null>(null);
+  const [productForm, setProductForm] = useState({
+    name: '',
+    description: '',
+    price: '',
+    currency: 'COP',
+    category_id: '',
+    image: '',
+    available: true,
+  });
+  const [productImageFile, setProductImageFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  
   // Initialize form when vendor data is loaded
-  React.useEffect(() => {
+  useEffect(() => {
     if (vendor) {
       setProfileForm({
         name: vendor.name,
         description: vendor.description,
         location: vendor.location,
-        hours: vendor.hours || '9AM - 6PM',
+        hours: vendor.hours || '',
       });
     }
   }, [vendor]);
@@ -120,20 +117,218 @@ const VendorManage = () => {
   
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfileMutation.mutate(profileForm);
+    
+    if (!vendor || !id) return;
+    
+    updateVendorMutation.mutate(
+      { 
+        id, 
+        updates: {
+          name: profileForm.name,
+          description: profileForm.description,
+          location: profileForm.location,
+          hours: profileForm.hours,
+        } 
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Perfil actualizado",
+            description: "Tu perfil de vendedor ha sido actualizado exitosamente",
+          });
+        },
+        onError: (error) => {
+          toast({
+            title: "Error",
+            description: `No se pudo actualizar el perfil: ${error.message}`,
+            variant: "destructive"
+          });
+        }
+      }
+    );
+  };
+  
+  const openProductDialog = (product?: any) => {
+    if (product) {
+      setEditingProduct(product);
+      setProductForm({
+        name: product.name,
+        description: product.description,
+        price: product.price.toString(),
+        currency: product.currency,
+        category_id: product.category_id,
+        image: product.image,
+        available: product.available,
+      });
+    } else {
+      setEditingProduct(null);
+      setProductForm({
+        name: '',
+        description: '',
+        price: '',
+        currency: 'COP',
+        category_id: '',
+        image: '',
+        available: true,
+      });
+    }
+    setIsProductDialogOpen(true);
+  };
+  
+  const handleProductChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setProductForm(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleSelectChange = (name: string, value: string) => {
+    setProductForm(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleToggleAvailable = () => {
+    setProductForm(prev => ({ ...prev, available: !prev.available }));
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setProductImageFile(e.target.files[0]);
+    }
+  };
+  
+  const uploadProductImage = async (): Promise<string> => {
+    if (!productImageFile) return productForm.image;
+    
+    setIsUploading(true);
+    
+    try {
+      const fileExt = productImageFile.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, productImageFile);
+      
+      if (uploadError) throw uploadError;
+      
+      const { data } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+      
+      setIsUploading(false);
+      return data.publicUrl;
+    } catch (error: any) {
+      setIsUploading(false);
+      toast({
+        title: "Error de carga",
+        description: `No se pudo cargar la imagen: ${error.message}`,
+        variant: "destructive"
+      });
+      return productForm.image;
+    }
+  };
+  
+  const handleSubmitProduct = async () => {
+    if (!id) return;
+    
+    // Validate form
+    if (!productForm.name.trim() || !productForm.description.trim() || !productForm.price || !productForm.category_id) {
+      toast({
+        title: "Campos requeridos",
+        description: "Por favor completa todos los campos requeridos",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Upload image if selected
+    const imageUrl = await uploadProductImage();
+    
+    const productData = {
+      name: productForm.name,
+      description: productForm.description,
+      price: parseFloat(productForm.price),
+      currency: productForm.currency,
+      category_id: productForm.category_id,
+      image: imageUrl || '/placeholder.svg',
+      available: productForm.available,
+      vendor_id: id,
+    };
+    
+    if (editingProduct) {
+      // Update existing product
+      updateProductMutation.mutate(
+        { id: editingProduct.id, updates: productData },
+        {
+          onSuccess: () => {
+            toast({
+              title: "Producto actualizado",
+              description: "El producto ha sido actualizado exitosamente",
+            });
+            setIsProductDialogOpen(false);
+          },
+          onError: (error) => {
+            toast({
+              title: "Error",
+              description: `No se pudo actualizar el producto: ${error.message}`,
+              variant: "destructive"
+            });
+          }
+        }
+      );
+    } else {
+      // Create new product
+      createProductMutation.mutate(
+        productData,
+        {
+          onSuccess: () => {
+            toast({
+              title: "Producto creado",
+              description: "El producto ha sido creado exitosamente",
+            });
+            setIsProductDialogOpen(false);
+          },
+          onError: (error) => {
+            toast({
+              title: "Error",
+              description: `No se pudo crear el producto: ${error.message}`,
+              variant: "destructive"
+            });
+          }
+        }
+      );
+    }
   };
   
   const handleDeleteProduct = (productId: string) => {
-    deleteProductMutation.mutate(productId);
+    if (!id) return;
+    
+    deleteProductMutation.mutate(
+      { id: productId, vendorId: id },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Producto eliminado",
+            description: "El producto ha sido eliminado exitosamente",
+          });
+        },
+        onError: (error) => {
+          toast({
+            title: "Error",
+            description: `No se pudo eliminar el producto: ${error.message}`,
+            variant: "destructive"
+          });
+        }
+      }
+    );
   };
   
   // Check if the current user is the vendor owner
   const isVendorOwner = () => {
-    return isAuthenticated && user?.id === vendor?.ownerId;
+    return isAuthenticated && user?.id === vendor?.owner_id;
   };
   
   // If not authenticated or not the vendor owner, redirect
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isLoadingVendor && vendor && !isVendorOwner()) {
       toast({
         title: "Acceso denegado",
@@ -142,7 +337,7 @@ const VendorManage = () => {
       });
       navigate(`/vendor/${id}`);
     }
-  }, [isLoadingVendor, vendor, isVendorOwner, navigate, id, toast]);
+  }, [isLoadingVendor, vendor, navigate, id, toast]);
   
   if (isLoadingVendor) {
     return (
@@ -150,9 +345,9 @@ const VendorManage = () => {
         <Header />
         <div className="container mx-auto px-4 py-16 flex justify-center">
           <div className="animate-pulse flex flex-col items-center">
-            <div className="h-32 w-32 bg-gray-200 rounded-full mb-4"></div>
-            <div className="h-8 w-64 bg-gray-200 rounded mb-4"></div>
-            <div className="h-4 w-48 bg-gray-200 rounded"></div>
+            <Skeleton className="h-32 w-32 rounded-full mb-4" />
+            <Skeleton className="h-8 w-64 mb-4" />
+            <Skeleton className="h-4 w-48" />
           </div>
         </div>
         <Footer />
@@ -213,7 +408,7 @@ const VendorManage = () => {
                         <div className="flex items-center space-x-4 mb-6">
                           <div className="w-24 h-24 bg-gray-200 rounded-full overflow-hidden">
                             <img 
-                              src={vendor.profileImage || '/placeholder.svg'} 
+                              src={vendor.profile_image || '/placeholder.svg'} 
                               alt={vendor.name}
                               className="w-full h-full object-cover"
                             />
@@ -235,7 +430,7 @@ const VendorManage = () => {
                           </label>
                           <div className="h-48 bg-gray-200 rounded-md overflow-hidden">
                             <img 
-                              src={vendor.coverImage || '/placeholder.svg'} 
+                              src={vendor.cover_image || '/placeholder.svg'} 
                               alt="Cover"
                               className="w-full h-full object-cover"
                             />
@@ -312,9 +507,9 @@ const VendorManage = () => {
                       <Button 
                         type="submit"
                         className="bg-barrio-orange hover:bg-barrio-orange/90"
-                        disabled={updateProfileMutation.isPending}
+                        disabled={updateVendorMutation.isPending}
                       >
-                        {updateProfileMutation.isPending ? "Guardando..." : "Guardar Cambios"}
+                        {updateVendorMutation.isPending ? "Guardando..." : "Guardar Cambios"}
                       </Button>
                     </div>
                   </form>
@@ -326,7 +521,10 @@ const VendorManage = () => {
             <TabsContent value="products">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold">Mis Productos</h2>
-                <Button className="bg-barrio-green hover:bg-barrio-green/90">
+                <Button 
+                  className="bg-barrio-green hover:bg-barrio-green/90"
+                  onClick={() => openProductDialog()}
+                >
                   <Plus className="w-4 h-4 mr-2" /> Nuevo Producto
                 </Button>
               </div>
@@ -335,11 +533,11 @@ const VendorManage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3].map(i => (
                     <Card key={i} className="animate-pulse">
-                      <div className="h-48 bg-gray-200 rounded-t-md"></div>
+                      <Skeleton className="h-48 rounded-t-md" />
                       <CardContent className="p-4">
-                        <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-                        <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                        <Skeleton className="h-6 w-3/4 mb-4" />
+                        <Skeleton className="h-4 w-full mb-2" />
+                        <Skeleton className="h-4 w-2/3" />
                       </CardContent>
                     </Card>
                   ))}
@@ -358,15 +556,24 @@ const VendorManage = () => {
                       <CardContent className="p-4">
                         <h3 className="font-medium text-lg mb-1">{product.name}</h3>
                         <p className="text-gray-500 text-sm mb-2">{product.description}</p>
-                        <p className="font-bold text-barrio-orange">
-                          {new Intl.NumberFormat('es-CO', { 
-                            style: 'currency', 
-                            currency: product.currency || 'COP' 
-                          }).format(product.price)}
-                        </p>
+                        <div className="flex justify-between items-center">
+                          <p className="font-bold text-barrio-orange">
+                            {formatCurrency(product.price, product.currency)}
+                          </p>
+                          <Badge 
+                            variant={product.available ? "default" : "secondary"}
+                            className={product.available ? "bg-green-500" : "bg-gray-400"}
+                          >
+                            {product.available ? "Disponible" : "No disponible"}
+                          </Badge>
+                        </div>
                       </CardContent>
                       <CardFooter className="px-4 pb-4 pt-0 flex justify-end gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => openProductDialog(product)}
+                        >
                           <PenLine className="w-4 h-4 mr-2" /> Editar
                         </Button>
                         
@@ -402,12 +609,188 @@ const VendorManage = () => {
                 <Card className="text-center py-12">
                   <CardContent>
                     <p className="text-gray-500 mb-4">Aún no has agregado productos a tu tienda.</p>
-                    <Button className="bg-barrio-green hover:bg-barrio-green/90">
+                    <Button 
+                      className="bg-barrio-green hover:bg-barrio-green/90"
+                      onClick={() => openProductDialog()}
+                    >
                       <Plus className="w-4 h-4 mr-2" /> Agregar tu primer producto
                     </Button>
                   </CardContent>
                 </Card>
               )}
+              
+              {/* Product Dialog */}
+              <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingProduct ? "Editar Producto" : "Agregar Nuevo Producto"}
+                    </DialogTitle>
+                    <DialogDescription>
+                      Completa la información del producto para agregarlo a tu catálogo.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="product-name">Nombre del Producto</Label>
+                        <Input 
+                          id="product-name" 
+                          name="name"
+                          value={productForm.name}
+                          onChange={handleProductChange}
+                          placeholder="Ej. Mango Tommy Atkins"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="product-price">Precio</Label>
+                        <Input 
+                          id="product-price" 
+                          name="price"
+                          value={productForm.price}
+                          onChange={handleProductChange}
+                          type="number"
+                          placeholder="Ej. 5000"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="product-currency">Moneda</Label>
+                        <Select 
+                          value={productForm.currency} 
+                          onValueChange={(value) => handleSelectChange('currency', value)}
+                        >
+                          <SelectTrigger id="product-currency">
+                            <SelectValue placeholder="Selecciona moneda" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="COP">Peso Colombiano (COP)</SelectItem>
+                            <SelectItem value="USD">Dólar (USD)</SelectItem>
+                            <SelectItem value="MXN">Peso Mexicano (MXN)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="product-category">Categoría</Label>
+                        {isLoadingCategories ? (
+                          <Skeleton className="h-10 w-full" />
+                        ) : (
+                          <Select 
+                            value={productForm.category_id} 
+                            onValueChange={(value) => handleSelectChange('category_id', value)}
+                          >
+                            <SelectTrigger id="product-category">
+                              <SelectValue placeholder="Selecciona categoría" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {categories?.map(category => (
+                                <SelectItem key={category.id} value={category.id}>
+                                  {category.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          type="button" 
+                          variant={productForm.available ? "default" : "outline"}
+                          size="sm"
+                          className={productForm.available ? "bg-green-500 hover:bg-green-600" : ""}
+                          onClick={handleToggleAvailable}
+                        >
+                          {productForm.available ? (
+                            <>
+                              <Check className="w-4 h-4 mr-2" /> Disponible
+                            </>
+                          ) : (
+                            <>
+                              <X className="w-4 h-4 mr-2" /> No Disponible
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="product-description">Descripción</Label>
+                        <Textarea 
+                          id="product-description" 
+                          name="description"
+                          value={productForm.description}
+                          onChange={handleProductChange}
+                          placeholder="Describe tu producto y sus características..."
+                          rows={3}
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="product-image">Imagen del Producto</Label>
+                        <div className="mt-2">
+                          <div className="h-40 bg-gray-100 rounded-md overflow-hidden mb-3">
+                            {productForm.image || productImageFile ? (
+                              <img 
+                                src={productImageFile ? URL.createObjectURL(productImageFile) : productForm.image} 
+                                alt="Product preview" 
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <span>Vista previa de la imagen</span>
+                              </div>
+                            )}
+                          </div>
+                          <Label htmlFor="image-upload" className="cursor-pointer">
+                            <div className="flex items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-md py-3 hover:bg-gray-50 transition-colors">
+                              <Upload className="w-5 h-5 mr-2 text-gray-500" />
+                              <span className="text-sm text-gray-600">Seleccionar imagen</span>
+                            </div>
+                            <input 
+                              id="image-upload" 
+                              type="file" 
+                              className="hidden" 
+                              accept="image/*"
+                              onChange={handleFileChange}
+                            />
+                          </Label>
+                          <p className="text-xs text-gray-500 mt-2">
+                            JPG, PNG o GIF. Tamaño máximo 2MB.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setIsProductDialogOpen(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      onClick={handleSubmitProduct}
+                      disabled={createProductMutation.isPending || updateProductMutation.isPending || isUploading}
+                      className="bg-barrio-green hover:bg-barrio-green/90"
+                    >
+                      {isUploading 
+                        ? "Subiendo imagen..." 
+                        : createProductMutation.isPending || updateProductMutation.isPending 
+                          ? "Guardando..." 
+                          : editingProduct 
+                            ? "Actualizar Producto" 
+                            : "Agregar Producto"
+                      }
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </TabsContent>
             
             {/* Settings Tab */}

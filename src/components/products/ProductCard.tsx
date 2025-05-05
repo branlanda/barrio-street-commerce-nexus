@@ -1,8 +1,11 @@
 
 import React from 'react';
-import { Product, formatCurrency } from '@/lib/mockData';
+import { Product } from '@/types/supabase';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
+import { formatCurrency } from '@/lib/mockData';
 
 interface ProductCardProps {
   product: Product;
@@ -10,34 +13,42 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
-    <div className="market-card h-full flex flex-col overflow-hidden">
-      <div className="h-48 bg-gradient-to-br from-yellow-50 to-orange-50 overflow-hidden">
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+      <div className="h-48 overflow-hidden relative">
         <img 
           src={product.image || '/placeholder.svg'} 
           alt={product.name}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
         />
+        {!product.available && (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+            <Badge variant="secondary" className="bg-white text-gray-700 text-sm px-3 py-1">
+              Agotado
+            </Badge>
+          </div>
+        )}
       </div>
       
-      <div className="p-4 flex-grow flex flex-col bg-white">
-        <span className="text-xs font-medium text-green-600 mb-1 bg-green-50 rounded-full px-2 py-0.5 self-start">
-          Fresco
-        </span>
-        <h3 className="font-medium text-lg mb-1 text-orange-800">{product.name}</h3>
-        <p className="text-sm text-gray-500 line-clamp-2 mb-3 flex-grow">{product.description}</p>
+      <CardContent className="p-4">
+        <h3 className="font-medium text-lg">{product.name}</h3>
+        <p className="text-gray-500 text-sm mb-4 line-clamp-2">{product.description}</p>
         
-        <div className="flex items-center justify-between mt-auto">
-          <div className="font-display font-bold text-lg text-barrio-orange">
+        <div className="flex items-center justify-between">
+          <div className="font-bold text-barrio-orange">
             {formatCurrency(product.price, product.currency)}
           </div>
           
-          <Button size="sm" variant="outline" className="rounded-full border-barrio-orange text-barrio-orange hover:bg-barrio-orange hover:text-white">
-            <ShoppingBag className="h-4 w-4 mr-1" />
-            Agregar
+          <Button 
+            size="sm" 
+            className="bg-barrio-green hover:bg-barrio-green/90"
+            disabled={!product.available}
+          >
+            <ShoppingCart className="w-4 h-4 mr-1" />
+            Comprar
           </Button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
