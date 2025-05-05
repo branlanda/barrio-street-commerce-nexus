@@ -19,6 +19,8 @@ import AdminPanel from "./pages/admin/AdminPanel";
 import NotFound from "./pages/NotFound";
 import VendorListPage from "./pages/vendors/VendorListPage";
 import ServiceListPage from "./pages/services/ServiceListPage";
+import VendorDetail from "./pages/vendor/VendorDetail";
+import VendorManage from "./pages/vendor/VendorManage";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +50,12 @@ const App = () => (
           } />
           <Route path="/vendors" element={<VendorListPage />} />
           <Route path="/services" element={<ServiceListPage />} />
+          <Route path="/vendor/:id" element={<VendorDetail />} />
+          <Route path="/vendor/manage/:id" element={
+            <ProtectedRoute requiredRole="vendor">
+              <VendorManage />
+            </ProtectedRoute>
+          } />
           <Route path="/vendor/become" element={
             <ProtectedRoute>
               <BecomeVendor />
