@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +17,14 @@ interface VendorApplication {
   // Otros campos relevantes para la solicitud
 }
 
+// Interface for vendor application submission
+interface VendorApplicationSubmission {
+  businessType: string;
+  description: string;
+  serviceArea: string;
+  [key: string]: any; // For any additional fields
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -28,6 +35,7 @@ interface AuthContextType {
   logout: () => void;
   hasRole: (role: string) => boolean;
   pendingVendorApplication: VendorApplication | null;
+  submitVendorApplication: (data: VendorApplicationSubmission) => Promise<void>;
 }
 
 // Crea el contexto
@@ -158,6 +166,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  // Add the implementation for submitVendorApplication
+  const submitVendorApplication = async (data: VendorApplicationSubmission) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Mock API call - in a real app, this would be an API request
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Create a mock application
+      const application: VendorApplication = {
+        id: Math.random().toString(36).substring(2, 9),
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      };
+      
+      // Store the application
+      setPendingVendorApplication(application);
+      
+      toast({
+        title: "Solicitud enviada",
+        description: "Tu solicitud ha sido enviada y está pendiente de revisión",
+      });
+      
+    } catch (err) {
+      console.error('Application submission error:', err);
+      setError('Error al enviar la solicitud. Inténtalo de nuevo más tarde.');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo enviar la solicitud. Inténtalo de nuevo más tarde.",
+      });
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const hasRole = (role: string) => {
     return user?.roles.includes(role) || false;
   };
@@ -172,6 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     hasRole,
     pendingVendorApplication,
+    submitVendorApplication,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

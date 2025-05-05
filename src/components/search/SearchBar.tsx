@@ -33,7 +33,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         />
         <button
           type="submit"
-          className="absolute right-2.5 inset-y-2 px-4 py-1 rounded-md text-white font-medium bg-barrio-blue hover:bg-barrio-blue/90 transition-colors"
+          className="absolute right-2.5 top-1/2 transform -translate-y-1/2 px-4 py-1.5 rounded-md text-white font-medium bg-barrio-blue hover:bg-barrio-blue/90 transition-colors"
         >
           Buscar
         </button>
