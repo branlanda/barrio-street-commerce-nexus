@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
@@ -28,55 +28,53 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={
-              <ProtectedRoute requireAuth={false}>
-                <Login />
-              </ProtectedRoute>
-            } />
-            <Route path="/register" element={
-              <ProtectedRoute requireAuth={false}>
-                <Register />
-              </ProtectedRoute>
-            } />
-            <Route path="/vendor/register" element={<VendorRegister />} />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } />
-            <Route path="/vendors" element={<VendorListPage />} />
-            <Route path="/services" element={<ServiceListPage />} />
-            <Route path="/vendor/become" element={
-              <ProtectedRoute>
-                <BecomeVendor />
-              </ProtectedRoute>
-            } />
-            <Route path="/vendor/application-status" element={
-              <ProtectedRoute>
-                <ApplicationStatus />
-              </ProtectedRoute>
-            } />
-            <Route path="/unauthorized" element={<Unauthorized />} />
-            
-            {/* Admin Routes */}
-            <Route path="/admin" element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminPanel />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/:section" element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminPanel />
-              </ProtectedRoute>
-            } />
-            
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={
+            <ProtectedRoute requireAuth={false}>
+              <Login />
+            </ProtectedRoute>
+          } />
+          <Route path="/register" element={
+            <ProtectedRoute requireAuth={false}>
+              <Register />
+            </ProtectedRoute>
+          } />
+          <Route path="/vendor/register" element={<VendorRegister />} />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/vendors" element={<VendorListPage />} />
+          <Route path="/services" element={<ServiceListPage />} />
+          <Route path="/vendor/become" element={
+            <ProtectedRoute>
+              <BecomeVendor />
+            </ProtectedRoute>
+          } />
+          <Route path="/vendor/application-status" element={
+            <ProtectedRoute>
+              <ApplicationStatus />
+            </ProtectedRoute>
+          } />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminPanel />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/:section" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminPanel />
+            </ProtectedRoute>
+          } />
+          
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
