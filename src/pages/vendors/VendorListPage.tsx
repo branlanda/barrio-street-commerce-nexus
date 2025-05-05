@@ -11,7 +11,7 @@ import { Filter, MapPin } from 'lucide-react';
 
 const getVendorTypeTitle = (type: string | null): string => {
   const vendorTypeMap: Record<string, string> = {
-    'fruits': 'Frutas y Verduras',
+    'fruits': 'Frutas Tropicales',
     'electronics': 'Electrónicos',
     'entertainment': 'Películas y Música',
     'lottery': 'Lotería',
@@ -72,32 +72,32 @@ const VendorListPage: React.FC = () => {
       
       <main className="flex-grow">
         {/* Hero Section with color based on vendor type */}
-        <div className="bg-gradient-to-r from-barrio-primary to-barrio-blue py-10 px-4">
+        <div className="bg-gradient-to-r from-orange-500 to-barrio-pink py-10 px-4">
           <div className="container mx-auto">
             <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
               {getVendorTypeTitle(vendorType)}
             </h1>
             <p className="text-white/80 max-w-2xl">
-              Encuentra vendedores locales que ofrecen productos frescos y de calidad cerca de ti.
+              Encuentra vendedores locales que ofrecen las mejores frutas tropicales cerca de ti.
             </p>
           </div>
         </div>
         
         {/* Search and Filter Section */}
         <div className="container mx-auto px-4 py-6">
-          <div className="bg-white rounded-xl shadow-md p-4 -mt-8 relative z-10 mb-6">
+          <div className="bg-white rounded-xl shadow-md p-4 -mt-8 relative z-10 mb-6 border-t-4 border-orange-400">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-grow">
                 <SearchBar onSearch={handleSearch} placeholder="Buscar vendedores por nombre o productos..." />
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button variant="outline" className="flex items-center gap-2 border-orange-200 text-orange-700 hover:bg-orange-50">
                   <Filter className="w-4 h-4" />
                   <span>Filtros</span>
                 </Button>
                 <Button 
                   variant={isMapView ? "default" : "outline"}
-                  className={isMapView ? "bg-barrio-primary" : ""} 
+                  className={isMapView ? "bg-barrio-orange" : "border-orange-200 text-orange-700 hover:bg-orange-50"} 
                   onClick={() => setIsMapView(!isMapView)}
                 >
                   <MapPin className="w-4 h-4 mr-1" />
@@ -108,13 +108,14 @@ const VendorListPage: React.FC = () => {
           </div>
           
           {isMapView ? (
-            <div className="bg-gray-100 rounded-xl overflow-hidden h-[400px] mb-6 relative">
+            <div className="bg-yellow-50 rounded-xl overflow-hidden h-[400px] mb-6 relative">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <p className="text-gray-500 mb-2">Mapa próximamente</p>
+                  <p className="text-orange-700 mb-2">Mapa de vendedores de frutas tropicales próximamente</p>
                   <Button 
                     variant="outline" 
                     onClick={() => setIsMapView(false)}
+                    className="border-orange-300 text-orange-700 hover:bg-orange-50"
                   >
                     Ver Lista
                   </Button>
@@ -129,7 +130,7 @@ const VendorListPage: React.FC = () => {
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">
-                  <h3 className="text-xl font-medium mb-2">No se encontraron vendedores</h3>
+                  <h3 className="text-xl font-medium mb-2 text-orange-800">No se encontraron vendedores</h3>
                   <p className="text-gray-500">Intenta con otra búsqueda o categoría</p>
                 </div>
               )}

@@ -16,15 +16,16 @@ interface VendorTypeCardProps {
   icon: React.ReactNode;
   title: string;
   onClick: () => void;
+  colorClass: string;
 }
 
-const VendorTypeCard: React.FC<VendorTypeCardProps> = ({ icon, title, onClick }) => {
+const VendorTypeCard: React.FC<VendorTypeCardProps> = ({ icon, title, onClick, colorClass }) => {
   return (
     <div 
-      className="bg-white rounded-lg p-5 text-center cursor-pointer transition-all duration-300 hover:scale-[1.02] border border-gray-100 hover:border-barrio-blue/30 shadow-sm hover:shadow-md group"
+      className={`bg-white rounded-lg p-5 text-center cursor-pointer transition-all duration-300 hover:scale-[1.02] border border-gray-100 hover:border-${colorClass}/30 shadow-sm hover:shadow-md group`}
       onClick={onClick}
     >
-      <div className="w-14 h-14 rounded-lg flex items-center justify-center mx-auto mb-4 bg-gray-50 text-barrio-blue group-hover:bg-barrio-blue/10 transition-colors">
+      <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 bg-${colorClass}/10 text-${colorClass} group-hover:bg-${colorClass}/20 transition-colors`}>
         {icon}
       </div>
       <h3 className="text-base font-medium text-gray-800">{title}</h3>
@@ -45,42 +46,50 @@ const VendorTypeSelector: React.FC = () => {
     { 
       id: 'fruits', 
       title: 'Frutas y Verduras', 
-      icon: <Apple className="w-7 h-7" />
+      icon: <Apple className="w-7 h-7" />,
+      color: 'barrio-orange'
     },
     { 
       id: 'electronics', 
       title: 'Electrónicos', 
-      icon: <Headphones className="w-7 h-7" />
+      icon: <Headphones className="w-7 h-7" />,
+      color: 'barrio-blue'
     },
     { 
       id: 'entertainment', 
       title: 'Películas y Música', 
-      icon: <Film className="w-7 h-7" />
+      icon: <Film className="w-7 h-7" />,
+      color: 'barrio-purple'
     },
     { 
       id: 'lottery', 
       title: 'Lotería', 
-      icon: <Ticket className="w-7 h-7" />
+      icon: <Ticket className="w-7 h-7" />,
+      color: 'barrio-green'
     },
     { 
       id: 'food', 
       title: 'Alimentos', 
-      icon: <Utensils className="w-7 h-7" />
+      icon: <Utensils className="w-7 h-7" />,
+      color: 'barrio-pink'
     },
     { 
       id: 'clothing', 
       title: 'Ropa y Accesorios', 
-      icon: <Shirt className="w-7 h-7" />
+      icon: <Shirt className="w-7 h-7" />,
+      color: 'barrio-blue'
     },
     { 
       id: 'stationery', 
       title: 'Papelería', 
-      icon: <Book className="w-7 h-7" />
+      icon: <Book className="w-7 h-7" />,
+      color: 'barrio-green'
     },
     { 
       id: 'other', 
       title: 'Otros Productos', 
-      icon: <ShoppingBag className="w-7 h-7" />
+      icon: <ShoppingBag className="w-7 h-7" />,
+      color: 'barrio-accent'
     }
   ];
   
@@ -92,6 +101,7 @@ const VendorTypeSelector: React.FC = () => {
           icon={type.icon}
           title={type.title}
           onClick={() => handleSelectType(type.id)}
+          colorClass={type.color}
         />
       ))}
     </div>

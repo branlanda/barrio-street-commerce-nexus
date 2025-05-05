@@ -63,20 +63,22 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Barrio Market Custom Colors - Updated for better readability
+				// Barrio Market Tropical Fruit Theme Colors
 				barrio: {
-					'primary': '#1492C3', // Blue
-					'primary-dark': '#0F7CAB', // Darker blue
+					'primary': '#FF9F1C', // Mango orange
+					'primary-dark': '#E67E00', // Darker orange
 					'secondary': '#FF3366', // Pink
-					'accent': '#FFB82B', // Yellow
+					'accent': '#FFBF69', // Light orange
 					'neutral': '#F9FAFB',
 					'dark': '#1A1F2C',
-					// Updated vibrant colors with better contrast
-					'blue': '#1492C3', // Primary blue
-					'pink': '#FF3366', // Vibrant pink
-					'purple': '#7C3AED', // Purple
-					'orange': '#F97316', // Orange
-					'green': '#10B981', // Green
+					// Tropical fruit inspired colors
+					'blue': '#1492C3', // Blueberry
+					'pink': '#FF3366', // Dragon fruit
+					'purple': '#9D4EDD', // Purple mangosteen
+					'orange': '#FF9F1C', // Mango/Papaya
+					'green': '#2EC4B6', // Lime/Avocado
+					'yellow': '#FFCA3A', // Banana/Pineapple
+					'red': '#FF595E', // Watermelon/Cherry
 				}
 			},
 			borderRadius: {
@@ -134,6 +136,7 @@ export default {
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
 				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+				'fruit-pattern': "url('/patterns/fruit-pattern.png')",
 			}
 		}
 	},

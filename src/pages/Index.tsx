@@ -24,12 +24,12 @@ const Index = () => {
       <Header />
       
       <main className="flex-grow">
-        {/* Hero Section with vibrant gradient background */}
-        <div className="bg-gradient-to-r from-barrio-blue via-barrio-primary to-barrio-pink py-16 md:py-24 text-white relative overflow-hidden">
+        {/* Hero Section with tropical fruit gradient background */}
+        <div className="bg-gradient-to-r from-barrio-orange via-orange-400 to-barrio-pink py-16 md:py-24 text-white relative overflow-hidden">
           <div className="absolute inset-0 opacity-20">
-            <div className="absolute right-0 bottom-0 w-48 h-48 bg-barrio-accent rounded-full -mr-20 -mb-20"></div>
-            <div className="absolute left-20 top-10 w-24 h-24 bg-barrio-orange rounded-full"></div>
-            <div className="absolute right-1/4 top-1/3 w-32 h-32 bg-barrio-purple rounded-full"></div>
+            <div className="absolute right-0 bottom-0 w-48 h-48 bg-yellow-300 rounded-full -mr-20 -mb-20"></div>
+            <div className="absolute left-20 top-10 w-24 h-24 bg-green-400 rounded-full"></div>
+            <div className="absolute right-1/4 top-1/3 w-32 h-32 bg-pink-400 rounded-full"></div>
           </div>
           
           <div className="container mx-auto px-4 z-10 relative">
@@ -45,23 +45,23 @@ const Index = () => {
               </div>
               
               <h1 className="text-4xl md:text-6xl font-display font-bold mb-6 leading-tight">
-                Tu <span className="text-barrio-accent">barrio</span> en tus manos
+                Tu <span className="text-yellow-300">barrio</span> tropical
               </h1>
               <p className="text-lg md:text-xl mb-8 text-white/90 max-w-2xl">
-                Conectamos vendedores locales y servicios informales con compradores en toda Latinoamérica. Todo lo que necesitas a unos clics de distancia.
+                Conectamos vendedores de frutas tropicales y servicios locales con compradores en toda Latinoamérica. Frescura a unos clics de distancia.
               </p>
               
               <div className="bg-white/10 backdrop-blur-md p-2 rounded-2xl mb-8 max-w-2xl">
                 <SearchBar 
                   onSearch={handleSearch} 
-                  placeholder="Buscar vendedores, servicios o productos..."
+                  placeholder="Buscar frutas, vendedores o servicios..."
                 />
               </div>
               
               <div className="flex flex-wrap gap-4">
                 <Button 
                   size="lg" 
-                  className="bg-barrio-pink hover:bg-barrio-pink/90 text-white barrio-button"
+                  className="bg-barrio-orange hover:bg-barrio-orange/90 text-white barrio-button"
                 >
                   Explorar Mercado
                 </Button>
@@ -80,8 +80,8 @@ const Index = () => {
         {/* Main Selection Area */}
         <div className="container mx-auto px-4 py-12">
           <div className="mb-8 text-center">
-            <h2 className="text-3xl font-display font-bold mb-3">¿Qué estás buscando hoy?</h2>
-            <p className="text-gray-600">Selecciona entre vendedores ambulantes o servicios informales</p>
+            <h2 className="text-3xl font-display font-bold mb-3">¿Qué frutas buscas hoy?</h2>
+            <p className="text-gray-600">Selecciona entre vendedores de frutas o servicios locales</p>
           </div>
           
           <Tabs 
@@ -106,12 +106,12 @@ const Index = () => {
         </div>
         
         {/* Location-based section */}
-        <div className="bg-gradient-to-br from-barrio-blue/5 to-barrio-primary/5 py-16">
+        <div className="bg-gradient-to-br from-yellow-100 to-orange-100 py-16">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-display font-bold mb-3">Encuentra lo mejor cerca de ti</h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Barrio Market te conecta con vendedores y servicios en tu vecindario, apoyando la economía local.
+              <h2 className="text-3xl font-display font-bold mb-3 text-orange-800">Encuentra las mejores frutas cerca de ti</h2>
+              <p className="text-orange-700 max-w-2xl mx-auto">
+                Barrio Market te conecta con vendedores de frutas tropicales frescas y servicios en tu vecindario.
               </p>
             </div>
             
@@ -123,7 +123,7 @@ const Index = () => {
               />
               <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent p-8">
                 <h3 className="text-white text-2xl font-display font-bold mb-2">Colombia</h3>
-                <p className="text-white/80">Descubre tu barrio</p>
+                <p className="text-white/80">Descubre las frutas de tu barrio</p>
               </div>
             </div>
           </div>
@@ -132,62 +132,62 @@ const Index = () => {
         {/* Benefits Section */}
         <div className="container mx-auto px-4 py-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-display font-bold mb-3">¿Por qué usar Barrio Market?</h2>
+            <h2 className="text-3xl font-display font-bold mb-3 text-orange-800">¿Por qué elegir Barrio Market?</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Conectamos la economía informal con la tecnología para crear mejores oportunidades para todos.
+              Conectamos vendedores de frutas tropicales con la tecnología para crear mejores oportunidades.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-barrio-pink/10 hover:border-barrio-pink/30 transition-all">
-              <div className="w-16 h-16 bg-barrio-pink/10 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-barrio-pink" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-orange-100 hover:border-orange-300 transition-all">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-barrio-orange" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                   <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z"></path>
                   <path d="M16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"></path>
                 </svg>
               </div>
-              <h3 className="text-xl font-display font-semibold mb-3">Conecta Directo</h3>
+              <h3 className="text-xl font-display font-semibold mb-3 text-orange-800">Frutas Frescas</h3>
               <p className="text-gray-600">
-                Conectamos compradores con vendedores ambulantes y proveedores de servicios sin intermediarios.
+                Conectamos compradores con vendedores de frutas tropicales frescas sin intermediarios.
               </p>
             </div>
             
-            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-barrio-blue/10 hover:border-barrio-blue/30 transition-all">
-              <div className="w-16 h-16 bg-barrio-blue/10 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-barrio-blue" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-green-100 hover:border-green-300 transition-all">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
                 </svg>
               </div>
-              <h3 className="text-xl font-display font-semibold mb-3">Comunidad Local</h3>
+              <h3 className="text-xl font-display font-semibold mb-3 text-green-800">Comunidad Local</h3>
               <p className="text-gray-600">
-                Construimos comunidad al apoyar pequeños comerciantes y servicios de tu barrio.
+                Construimos comunidad al apoyar pequeños comerciantes de frutas de tu barrio.
               </p>
             </div>
             
-            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-barrio-accent/10 hover:border-barrio-accent/30 transition-all">
-              <div className="w-16 h-16 bg-barrio-accent/10 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-barrio-accent" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-yellow-100 hover:border-yellow-300 transition-all">
+              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-yellow-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                   <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
                 </svg>
               </div>
-              <h3 className="text-xl font-display font-semibold mb-3">Confianza y Calidad</h3>
+              <h3 className="text-xl font-display font-semibold mb-3 text-yellow-800">Calidad Garantizada</h3>
               <p className="text-gray-600">
-                Sistema de calificaciones y reseñas para garantizar la mejor experiencia.
+                Sistema de calificaciones para garantizar la mejor calidad en frutas tropicales.
               </p>
             </div>
           </div>
         </div>
         
         {/* Call to action */}
-        <div className="bg-gradient-to-r from-barrio-primary to-barrio-blue text-white py-16">
+        <div className="bg-gradient-to-r from-orange-500 to-barrio-pink text-white py-16">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-display font-bold mb-4">¿Eres un vendedor ambulante o ofreces servicios informales?</h2>
+            <h2 className="text-3xl font-display font-bold mb-4">¿Vendes frutas tropicales o servicios locales?</h2>
             <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
               Únete a Barrio Market y conecta con miles de clientes potenciales en tu área.
             </p>
             <Button 
               size="lg" 
-              className="bg-white text-barrio-primary hover:bg-white/90 barrio-button px-8"
+              className="bg-white text-orange-600 hover:bg-white/90 barrio-button px-8"
               onClick={() => navigate('/vendor/become')}
             >
               Comienza a Vender
