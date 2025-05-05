@@ -25,7 +25,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Search, 
   CheckCircle, 
   XCircle, 
   PauseCircle, 
@@ -34,6 +33,7 @@ import {
   Ban,
   Eye
 } from 'lucide-react';
+import SearchPanel from './SearchPanel';
 
 // Mock vendor application data
 const mockApplications = [
@@ -151,6 +151,7 @@ const mockVendors = [
 const VendorManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState('applications');
   
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -197,6 +198,29 @@ const VendorManagement = () => {
   const handleViewApplication = (application: any) => {
     setSelectedApplication(application);
   };
+
+  const handleSearchApplications = (query: string) => {
+    // In a real app, this would filter applications based on the query
+    setSearchTerm(query);
+  };
+
+  const handleSearchVendors = (query: string) => {
+    // In a real app, this would filter vendors based on the query
+    setSearchTerm(query);
+  };
+
+  const filteredApplications = mockApplications.filter(app => 
+    app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    app.businessTypeLabel.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredVendors = mockVendors.filter(vendor => 
+    vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vendor.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vendor.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vendor.location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   
   return (
     <div className="space-y-6">
@@ -205,29 +229,23 @@ const VendorManagement = () => {
         <p className="text-muted-foreground">Administra vendedores y solicitudes de registro.</p>
       </div>
       
-      <Tabs defaultValue="applications">
+      <Tabs defaultValue="applications" onValueChange={tab => {
+        setActiveTab(tab);
+        setSearchTerm('');
+        setSelectedApplication(null);
+      }}>
         <TabsList>
           <TabsTrigger value="applications">Solicitudes</TabsTrigger>
           <TabsTrigger value="vendors">Vendedores</TabsTrigger>
         </TabsList>
         <TabsContent value="applications" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="relative w-64">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar solicitudes..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2">
-              <Badge variant="outline" className="rounded-full cursor-pointer">Todas</Badge>
-              <Badge variant="outline" className="rounded-full cursor-pointer">Pendientes</Badge>
-              <Badge variant="outline" className="rounded-full cursor-pointer">Aprobadas</Badge>
-              <Badge variant="outline" className="rounded-full cursor-pointer">Rechazadas</Badge>
-            </div>
-          </div>
+          <SearchPanel 
+            title="Solicitudes de vendedores"
+            description="Revisa y gestiona las solicitudes para convertirse en vendedor"
+            onSearch={handleSearchApplications}
+            placeholder="Buscar por nombre, email o tipo de negocio..."
+            showFilters={true}
+          />
           
           <Card>
             <CardContent className="p-0">
@@ -242,7 +260,7 @@ const VendorManagement = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockApplications.map((application) => (
+                  {filteredApplications.map((application) => (
                     <TableRow key={application.id}>
                       <TableCell className="font-medium">{application.name}</TableCell>
                       <TableCell>{application.businessTypeLabel}</TableCell>
@@ -313,20 +331,14 @@ const VendorManagement = () => {
         </TabsContent>
         
         <TabsContent value="vendors" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="relative w-64">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar vendedores..."
-                className="pl-8"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Badge variant="outline" className="rounded-full cursor-pointer">Todos</Badge>
-              <Badge variant="outline" className="rounded-full cursor-pointer">Activos</Badge>
-              <Badge variant="outline" className="rounded-full cursor-pointer">Suspendidos</Badge>
-            </div>
-          </div>
+          <SearchPanel 
+            title="Gestión de vendedores"
+            description="Administra los vendedores activos en la plataforma"
+            onSearch={handleSearchVendors}
+            placeholder="Buscar por nombre, negocio o ubicación..."
+            showFilters={true}
+            showExport={true}
+          />
           
           <Card>
             <CardContent className="p-0">
@@ -343,7 +355,7 @@ const VendorManagement = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockVendors.map((vendor) => (
+                  {filteredVendors.map((vendor) => (
                     <TableRow key={vendor.id}>
                       <TableCell className="font-medium">{vendor.name}</TableCell>
                       <TableCell>{vendor.businessName}</TableCell>

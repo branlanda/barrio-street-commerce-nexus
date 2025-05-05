@@ -5,7 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 import VendorManagement from '@/components/admin/VendorManagement';
-import UserManagement from '@/components/admin/UserManagement';
+import UserManagementEnhanced from '@/components/admin/UserManagementEnhanced';
 import CategoryManagement from '@/components/admin/CategoryManagement';
 import CouponManagement from '@/components/admin/CouponManagement';
 import ReviewManagement from '@/components/admin/ReviewManagement';
@@ -27,7 +27,7 @@ const AdminPanel = () => {
       case 'vendors':
         return <VendorManagement />;
       case 'users':
-        return <UserManagement />;
+        return <UserManagementEnhanced />;
       case 'categories':
         return <CategoryManagement />;
       case 'coupons':
