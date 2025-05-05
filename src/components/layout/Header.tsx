@@ -1,10 +1,27 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Search, Menu, ShoppingBag, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { 
+  Search, 
+  Menu, 
+  ShoppingBag, 
+  User, 
+  LogOut,
+  ChevronDown
+} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
+  const { user, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -35,12 +52,46 @@ const Header = () => {
           <Button variant="ghost" size="icon">
             <ShoppingBag className="h-6 w-6" />
           </Button>
-          <Button variant="ghost" size="icon">
-            <User className="h-6 w-6" />
-          </Button>
-          <Button variant="default" className="hidden md:flex bg-barrio-primary hover:bg-barrio-primary-dark">
-            Ingresar
-          </Button>
+          
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  <span className="hidden md:inline">{user?.name}</span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Mi perfil</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => logout()}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Cerrar sesión</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => navigate('/login')}
+                className="md:hidden"
+              >
+                <User className="h-6 w-6" />
+              </Button>
+              <Button 
+                variant="default" 
+                className="hidden md:flex bg-barrio-primary hover:bg-barrio-primary-dark"
+                onClick={() => navigate('/login')}
+              >
+                Ingresar
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
