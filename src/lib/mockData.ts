@@ -1,4 +1,3 @@
-
 // Mock data for Barrio Market development
 
 export interface Category {
@@ -19,6 +18,11 @@ export interface Vendor {
   reviewCount: number;
   isVerified: boolean;
   categories: string[];
+  // Add the missing properties
+  ownerId?: string;
+  ownerName?: string;
+  memberSince?: string;
+  hours?: string;
 }
 
 export interface Product {
@@ -83,7 +87,11 @@ export const vendors: Vendor[] = [
     rating: 4.8,
     reviewCount: 124,
     isVerified: true,
-    categories: ["1"]
+    categories: ["1"],
+    ownerId: "user1",
+    ownerName: "Juan Pérez",
+    memberSince: "Enero 2023",
+    hours: "8AM - 5PM"
   },
   {
     id: "2",
@@ -95,7 +103,11 @@ export const vendors: Vendor[] = [
     rating: 4.6,
     reviewCount: 89,
     isVerified: true,
-    categories: ["2"]
+    categories: ["2"],
+    ownerId: "user2",
+    ownerName: "María López",
+    memberSince: "Marzo 2023",
+    hours: "9AM - 6PM"
   },
   {
     id: "3",
@@ -107,7 +119,11 @@ export const vendors: Vendor[] = [
     rating: 4.9,
     reviewCount: 256,
     isVerified: true,
-    categories: ["3"]
+    categories: ["3"],
+    ownerId: "user3",
+    ownerName: "Carlos Rodríguez",
+    memberSince: "Febrero 2023",
+    hours: "10AM - 8PM"
   },
   {
     id: "4",
@@ -119,7 +135,11 @@ export const vendors: Vendor[] = [
     rating: 4.7,
     reviewCount: 73,
     isVerified: false,
-    categories: ["4"]
+    categories: ["4"],
+    ownerId: "user4",
+    ownerName: "Ana Gómez",
+    memberSince: "Abril 2023",
+    hours: "9AM - 5PM"
   },
   {
     id: "5",
@@ -131,7 +151,11 @@ export const vendors: Vendor[] = [
     rating: 4.5,
     reviewCount: 102,
     isVerified: false,
-    categories: ["5"]
+    categories: ["5"],
+    ownerId: "user5",
+    ownerName: "Roberto Sánchez",
+    memberSince: "Mayo 2023",
+    hours: "8:30AM - 6:30PM"
   }
 ];
 
