@@ -166,17 +166,6 @@ const LandingPage = () => {
               </Button>
             </div>
           </div>
-          
-          {/* Market Illustration */}
-          <div className="mt-12 md:mt-24 w-full max-w-5xl mx-auto rounded-lg overflow-hidden shadow-2xl">
-            <img 
-              src="/lovable-uploads/e18e1279-45b8-4afc-881d-1a5b1b2b2fab.png" 
-              alt="Tropical Market" 
-              className="w-full h-auto object-cover"
-            />
-          </div>
-        </div>
-        
         {/* Wave Divider */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" fill="#ffffff">
