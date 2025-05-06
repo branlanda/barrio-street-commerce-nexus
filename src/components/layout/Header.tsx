@@ -57,7 +57,12 @@ const Header = () => {
   // Handle search function
   const handleSearch = (query: string) => {
     console.log('Searching for:', query);
-    // Implement search functionality
+    // Updated search navigation
+    if (userType === 'products') {
+      navigate(`/products?search=${encodeURIComponent(query)}`);
+    } else {
+      navigate(`/services?search=${encodeURIComponent(query)}`);
+    }
   };
 
   // Effect to close mobile menu when navigating
@@ -73,6 +78,16 @@ const Header = () => {
       return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
     }
     return user.name.substring(0, 2).toUpperCase();
+  };
+
+  // Handle login navigation
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
+  // Handle register navigation
+  const handleRegister = () => {
+    navigate('/register');
   };
 
   return (
@@ -92,7 +107,7 @@ const Header = () => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-gray-700 dark:text-gray-300 flex items-center"
+              className={`text-gray-700 dark:text-gray-300 flex items-center ${location.pathname === '/' ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
               onClick={() => navigate('/')}
             >
               <Home className="mr-2 h-4 w-4" />
@@ -102,7 +117,7 @@ const Header = () => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-gray-700 dark:text-gray-300 flex items-center"
+              className={`text-gray-700 dark:text-gray-300 flex items-center ${location.pathname === '/vendors' ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
               onClick={() => navigate('/vendors')}
             >
               <Compass className="mr-2 h-4 w-4" />
@@ -326,14 +341,14 @@ const Header = () => {
                 <Button 
                   variant="ghost" 
                   className="text-gray-700 dark:text-gray-300"
-                  onClick={() => navigate('/login')}
+                  onClick={handleLogin}
                 >
                   {language === 'es' ? 'Ingresar' : 'Login'}
                 </Button>
                 <Button 
                   variant="default" 
                   className="bg-barrio-primary hover:bg-barrio-primary-dark"
-                  onClick={() => navigate('/register')}
+                  onClick={handleRegister}
                 >
                   {language === 'es' ? 'Registrarse' : 'Register'}
                 </Button>
@@ -406,7 +421,7 @@ const Header = () => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => navigate('/login')}
+                onClick={handleLogin}
               >
                 <User className="h-5 w-5" />
               </Button>

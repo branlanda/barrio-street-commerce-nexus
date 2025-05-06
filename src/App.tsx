@@ -59,6 +59,7 @@ const App = () => (
           } />
           <Route path="/vendors" element={<VendorListPage />} />
           <Route path="/services" element={<ServiceListPage />} />
+          <Route path="/products" element={<ServiceListPage />} /> {/* Added products route */}
           <Route path="/vendor/:id" element={<VendorDetail />} />
           <Route path="/vendor/manage/:id" element={
             <ProtectedRoute requiredRole="vendor">
