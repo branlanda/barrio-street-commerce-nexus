@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -226,11 +225,15 @@ const LandingPage = () => {
               </div>
             </div>
             
-            {/* Card 3 */}
+            {/* Card 3 - Updated with Mazamorra image */}
             <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group hover:-translate-y-2">
               <div className="h-48 bg-tropical-pink/20 relative overflow-hidden">
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <ShoppingBasket className="w-24 h-24 text-tropical-pink group-hover:scale-110 transition-transform duration-300" />
+                  <img 
+                    src="/lovable-uploads/8c8e7551-0403-487b-9988-a0a93caef160.png" 
+                    alt="Mazamorra" 
+                    className="w-36 h-36 object-contain group-hover:scale-110 transition-transform duration-300" 
+                  />
                 </div>
               </div>
               <div className="p-6">
