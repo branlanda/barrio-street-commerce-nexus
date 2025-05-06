@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Sun, Moon, Globe, ShoppingBag, Wrench, Apple, Sandwich, Phone, Lightbulb, GraduationCap } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { PalmLeaf } from '@/components/illustrations/PalmLeaf';
-import { FruitBubble } from '@/components/illustrations/FruitBubble';
 
 const Index = () => {
   const { user, isAuthenticated } = useAuth();
@@ -54,15 +52,12 @@ const Index = () => {
           )}
         </div>
       </header>
-
+      
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 opacity-50 pointer-events-none">
         <PalmLeaf className="text-tropical-dark/20 w-48 h-48" />
       </div>
-      {/* Removed the middle image (FruitBubble) that was here */}
-      <div className="absolute bottom-1/3 left-8 opacity-50 pointer-events-none">
-        <FruitBubble className="text-tropical-dark/20 w-24 h-24" />
-      </div>
+      {/* Removed all FruitBubble elements */}
       
       {/* Main Content */}
       <main className="flex-1 px-6 pt-6 pb-24 flex flex-col items-center justify-center relative">
