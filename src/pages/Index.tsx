@@ -59,9 +59,7 @@ const Index = () => {
       <div className="absolute top-0 left-0 opacity-50 pointer-events-none">
         <PalmLeaf className="text-tropical-dark/20 w-48 h-48" />
       </div>
-      <div className="absolute top-1/4 right-4 opacity-50 pointer-events-none">
-        <FruitBubble className="text-tropical-dark/20 w-16 h-16" />
-      </div>
+      {/* Removed the middle image (FruitBubble) that was here */}
       <div className="absolute bottom-1/3 left-8 opacity-50 pointer-events-none">
         <FruitBubble className="text-tropical-dark/20 w-24 h-24" />
       </div>
