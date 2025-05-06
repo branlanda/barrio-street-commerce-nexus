@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PenLine, Plus, Trash2, Check, X, Settings, Upload } from 'lucide-react';
@@ -52,8 +51,9 @@ import {
 import { useVendor, useUpdateVendor } from '@/api/vendors';
 import { useVendorProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/api/products';
 import { useCategories } from '@/api/categories';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/mockData';
+import { uploadFile } from '@/utils/fileUpload';
 
 const VendorManage = () => {
   const { id } = useParams<{ id: string }>();
@@ -96,7 +96,11 @@ const VendorManage = () => {
     image: '',
     available: true,
   });
+  
+  // Image upload states
   const [productImageFile, setProductImageFile] = useState<File | null>(null);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   
   // Initialize form when vendor data is loaded
@@ -116,37 +120,108 @@ const VendorManage = () => {
     setProfileForm(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setProfileImageFile(e.target.files[0]);
+    }
+  };
+  
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setCoverImageFile(e.target.files[0]);
+    }
+  };
+  
+  const uploadVendorImages = async () => {
+    setIsUploading(true);
+    let profile_image = vendor?.profile_image || '';
+    let cover_image = vendor?.cover_image || '';
+    let hasUploaded = false;
+    
+    try {
+      // Upload profile image if selected
+      if (profileImageFile) {
+        const profileUrl = await uploadFile(profileImageFile, 'vendor-images', 'profiles');
+        if (profileUrl) {
+          profile_image = profileUrl;
+          hasUploaded = true;
+        }
+      }
+      
+      // Upload cover image if selected
+      if (coverImageFile) {
+        const coverUrl = await uploadFile(coverImageFile, 'vendor-images', 'covers');
+        if (coverUrl) {
+          cover_image = coverUrl;
+          hasUploaded = true;
+        }
+      }
+      
+      return { profile_image, cover_image, hasUploaded };
+    } catch (error: any) {
+      toast({
+        title: "Error de carga",
+        description: `No se pudo cargar la imagen: ${error.message}`,
+        variant: "destructive"
+      });
+      return { profile_image, cover_image, hasUploaded: false };
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!vendor || !id) return;
     
-    updateVendorMutation.mutate(
-      { 
-        id, 
-        updates: {
-          name: profileForm.name,
-          description: profileForm.description,
-          location: profileForm.location,
-          hours: profileForm.hours,
-        } 
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: "Perfil actualizado",
-            description: "Tu perfil de vendedor ha sido actualizado exitosamente",
-          });
+    setIsUploading(true);
+    
+    try {
+      // Upload images if any were selected
+      const { profile_image, cover_image, hasUploaded } = await uploadVendorImages();
+      
+      // Update vendor information
+      updateVendorMutation.mutate(
+        { 
+          id, 
+          updates: {
+            name: profileForm.name,
+            description: profileForm.description,
+            location: profileForm.location,
+            hours: profileForm.hours,
+            ...(hasUploaded ? { profile_image, cover_image } : {}),
+          } 
         },
-        onError: (error) => {
-          toast({
-            title: "Error",
-            description: `No se pudo actualizar el perfil: ${error.message}`,
-            variant: "destructive"
-          });
+        {
+          onSuccess: () => {
+            toast({
+              title: "Perfil actualizado",
+              description: "Tu perfil de vendedor ha sido actualizado exitosamente",
+            });
+            
+            // Reset the file inputs
+            setProfileImageFile(null);
+            setCoverImageFile(null);
+          },
+          onError: (error) => {
+            toast({
+              title: "Error",
+              description: `No se pudo actualizar el perfil: ${error.message}`,
+              variant: "destructive"
+            });
+          }
         }
-      }
-    );
+      );
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: `No se pudo actualizar el perfil: ${error.message}`,
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
   
   const openProductDialog = (product?: any) => {
@@ -173,6 +248,7 @@ const VendorManage = () => {
         available: true,
       });
     }
+    setProductImageFile(null);
     setIsProductDialogOpen(true);
   };
   
@@ -201,30 +277,17 @@ const VendorManage = () => {
     setIsUploading(true);
     
     try {
-      const fileExt = productImageFile.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = `products/${fileName}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, productImageFile);
-      
-      if (uploadError) throw uploadError;
-      
-      const { data } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(filePath);
-      
-      setIsUploading(false);
-      return data.publicUrl;
+      const productUrl = await uploadFile(productImageFile, 'product-images', '');
+      return productUrl || productForm.image;
     } catch (error: any) {
-      setIsUploading(false);
       toast({
         title: "Error de carga",
         description: `No se pudo cargar la imagen: ${error.message}`,
         variant: "destructive"
       });
       return productForm.image;
+    } finally {
+      setIsUploading(false);
     }
   };
   
@@ -266,6 +329,7 @@ const VendorManage = () => {
               description: "El producto ha sido actualizado exitosamente",
             });
             setIsProductDialogOpen(false);
+            setProductImageFile(null);
           },
           onError: (error) => {
             toast({
@@ -287,6 +351,7 @@ const VendorManage = () => {
               description: "El producto ha sido creado exitosamente",
             });
             setIsProductDialogOpen(false);
+            setProductImageFile(null);
           },
           onError: (error) => {
             toast({
@@ -409,16 +474,25 @@ const VendorManage = () => {
                         <div className="flex items-center space-x-4 mb-6">
                           <div className="w-24 h-24 bg-gray-200 rounded-full overflow-hidden">
                             <img 
-                              src={vendor.profile_image || '/placeholder.svg'} 
+                              src={profileImageFile ? URL.createObjectURL(profileImageFile) : vendor.profile_image || '/placeholder.svg'} 
                               alt={vendor.name}
                               className="w-full h-full object-cover"
                             />
                           </div>
                           <div>
-                            <Button variant="outline" size="sm" className="mb-2">
-                              <PenLine className="w-4 h-4 mr-2" />
-                              Cambiar imagen
-                            </Button>
+                            <Label htmlFor="profile-image-upload" className="cursor-pointer">
+                              <Button variant="outline" size="sm" className="mb-2" type="button">
+                                <PenLine className="w-4 h-4 mr-2" />
+                                Cambiar imagen
+                              </Button>
+                              <input 
+                                id="profile-image-upload" 
+                                type="file" 
+                                className="hidden" 
+                                accept="image/*"
+                                onChange={handleProfileImageChange}
+                              />
+                            </Label>
                             <p className="text-xs text-gray-500">
                               JPG, PNG o GIF. Máximo 2MB.
                             </p>
@@ -431,16 +505,25 @@ const VendorManage = () => {
                           </label>
                           <div className="h-48 bg-gray-200 rounded-md overflow-hidden">
                             <img 
-                              src={vendor.cover_image || '/placeholder.svg'} 
+                              src={coverImageFile ? URL.createObjectURL(coverImageFile) : vendor.cover_image || '/placeholder.svg'} 
                               alt="Cover"
                               className="w-full h-full object-cover"
                             />
                           </div>
                           <div className="mt-2 flex justify-end">
-                            <Button variant="outline" size="sm">
-                              <PenLine className="w-4 h-4 mr-2" />
-                              Cambiar portada
-                            </Button>
+                            <Label htmlFor="cover-image-upload" className="cursor-pointer">
+                              <Button variant="outline" size="sm" type="button">
+                                <PenLine className="w-4 h-4 mr-2" />
+                                Cambiar portada
+                              </Button>
+                              <input 
+                                id="cover-image-upload" 
+                                type="file" 
+                                className="hidden" 
+                                accept="image/*"
+                                onChange={handleCoverImageChange}
+                              />
+                            </Label>
                           </div>
                         </div>
                       </div>
@@ -508,9 +591,9 @@ const VendorManage = () => {
                       <Button 
                         type="submit"
                         className="bg-barrio-orange hover:bg-barrio-orange/90"
-                        disabled={updateVendorMutation.isPending}
+                        disabled={updateVendorMutation.isPending || isUploading}
                       >
-                        {updateVendorMutation.isPending ? "Guardando..." : "Guardar Cambios"}
+                        {updateVendorMutation.isPending || isUploading ? "Guardando..." : "Guardar Cambios"}
                       </Button>
                     </div>
                   </form>
@@ -735,9 +818,15 @@ const VendorManage = () => {
                         <Label htmlFor="product-image">Imagen del Producto</Label>
                         <div className="mt-2">
                           <div className="h-40 bg-gray-100 rounded-md overflow-hidden mb-3">
-                            {productForm.image || productImageFile ? (
+                            {productImageFile ? (
                               <img 
-                                src={productImageFile ? URL.createObjectURL(productImageFile) : productForm.image} 
+                                src={URL.createObjectURL(productImageFile)} 
+                                alt="Product preview" 
+                                className="w-full h-full object-cover"
+                              />
+                            ) : productForm.image ? (
+                              <img 
+                                src={productForm.image} 
                                 alt="Product preview" 
                                 className="w-full h-full object-cover"
                               />
@@ -868,13 +957,4 @@ const VendorManage = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
-        </div>
-      </main>
-      
-      <Footer />
-    </div>
-  );
-};
-
-export default VendorManage;
+          </
