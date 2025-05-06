@@ -125,6 +125,19 @@
   .fruit-badge {
     @apply bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full text-xs font-medium;
   }
+  
+  /* Added for the new home page */
+  .tropical-gradient {
+    @apply bg-gradient-to-br from-tropical-pink via-tropical-orange to-tropical-yellow;
+  }
+  
+  .action-card {
+    @apply rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:scale-105 transition-transform shadow-lg;
+  }
+  
+  .category-icon {
+    @apply p-3 rounded-full mb-2 hover:scale-110 transition-transform;
+  }
 }
 
 /* Custom animations */

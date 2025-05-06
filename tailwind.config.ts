@@ -80,7 +80,7 @@ export default {
 					'yellow': '#FFCA3A', // Banana/Pineapple
 					'red': '#FF595E', // Watermelon/Cherry
 				},
-				// New tropical theme colors as requested
+				// Tropical theme colors as requested by the user
 				tropical: {
 					'pink': '#ff5e78',
 					'orange': '#ffb347',
