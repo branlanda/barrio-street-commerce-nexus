@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { 
   Search, 
   Menu, 
-  ShoppingBag, 
+  X, 
   User, 
   LogOut,
   ChevronDown,
@@ -15,7 +15,12 @@ import {
   Sun,
   Moon,
   Globe,
-  PlusCircle
+  PlusCircle,
+  Home,
+  Compass,
+  Heart,
+  Package,
+  LayoutDashboard
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,7 +29,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator
+  DropdownMenuSeparator,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import SearchBar from '@/components/search/SearchBar';
@@ -77,37 +87,126 @@ const Header = () => {
             </div>
           </Link>
 
-          {/* User Type Selector */}
-          <div className="flex ml-6 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
+          {/* Main Navigation */}
+          <nav className="flex items-center space-x-4">
             <Button 
-              variant={userType === "products" ? "default" : "ghost"} 
-              size="sm"
-              className={`rounded-full ${userType === "products" ? "bg-barrio-primary text-white" : "text-gray-600 dark:text-gray-300"}`}
-              onClick={() => setUserType("products")}
+              variant="ghost" 
+              size="sm" 
+              className="text-gray-700 dark:text-gray-300 flex items-center"
+              onClick={() => navigate('/')}
             >
-              Productos
+              <Home className="mr-2 h-4 w-4" />
+              {language === 'es' ? 'Inicio' : 'Home'}
             </Button>
+            
             <Button 
-              variant={userType === "services" ? "default" : "ghost"} 
-              size="sm"
-              className={`rounded-full ${userType === "services" ? "bg-barrio-primary text-white" : "text-gray-600 dark:text-gray-300"}`}
-              onClick={() => setUserType("services")}
+              variant="ghost" 
+              size="sm" 
+              className="text-gray-700 dark:text-gray-300 flex items-center"
+              onClick={() => navigate('/vendors')}
             >
-              Servicios
+              <Compass className="mr-2 h-4 w-4" />
+              {language === 'es' ? 'Explorar' : 'Explore'}
             </Button>
-          </div>
+
+            {/* User Type Selector - Shown to All */}
+            <div className="flex ml-4 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
+              <Button 
+                variant={userType === "products" ? "default" : "ghost"} 
+                size="sm"
+                className={`rounded-full ${userType === "products" ? "bg-barrio-primary text-white" : "text-gray-600 dark:text-gray-300"}`}
+                onClick={() => setUserType("products")}
+              >
+                {language === 'es' ? 'Productos' : 'Products'}
+              </Button>
+              <Button 
+                variant={userType === "services" ? "default" : "ghost"} 
+                size="sm"
+                className={`rounded-full ${userType === "services" ? "bg-barrio-primary text-white" : "text-gray-600 dark:text-gray-300"}`}
+                onClick={() => setUserType("services")}
+              >
+                {language === 'es' ? 'Servicios' : 'Services'}
+              </Button>
+            </div>
+          </nav>
 
           {/* Search Bar */}
           <div className="flex-1 max-w-md mx-6">
             <SearchBar 
               onSearch={handleSearch} 
-              placeholder={userType === "products" ? "Buscar productos..." : "Buscar servicios..."}
+              placeholder={userType === "products" 
+                ? (language === 'es' ? "Buscar productos..." : "Search products...") 
+                : (language === 'es' ? "Buscar servicios..." : "Search services...")}
               initialValue=""
             />
           </div>
 
           {/* Action Buttons */}
           <div className="flex items-center gap-3">
+            {/* Admin Panel Button - Only for Admins */}
+            {isAuthenticated && hasRole('admin') && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="border-barrio-primary text-barrio-primary hover:bg-barrio-primary/10"
+                  >
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    {language === 'es' ? 'Panel Admin' : 'Admin Panel'}
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => navigate('/admin')}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    {language === 'es' ? 'Dashboard' : 'Dashboard'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/vendors')}>
+                    <Store className="mr-2 h-4 w-4" />
+                    {language === 'es' ? 'Gestión de vendedores' : 'Vendor Management'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/users')}>
+                    <User className="mr-2 h-4 w-4" />
+                    {language === 'es' ? 'Gestión de usuarios' : 'User Management'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/categories')}>
+                    <Package className="mr-2 h-4 w-4" />
+                    {language === 'es' ? 'Categorías' : 'Categories'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/coupons')}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    {language === 'es' ? 'Cupones' : 'Coupons'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/reviews')}>
+                    <Heart className="mr-2 h-4 w-4" />
+                    {language === 'es' ? 'Reseñas' : 'Reviews'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            {/* Vendor Controls - Only for Vendors */}
+            {isAuthenticated && hasRole('vendor') && (
+              <>
+                <Button 
+                  variant="outline" 
+                  className="border-barrio-primary text-barrio-primary hover:bg-barrio-primary/10"
+                  onClick={() => navigate('/vendor/dashboard')}
+                >
+                  <Store className="mr-2 h-4 w-4" />
+                  {language === 'es' ? 'Mi tienda' : 'My Store'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-barrio-primary text-barrio-primary hover:bg-barrio-primary/10"
+                  onClick={() => navigate('/vendor/products')}
+                >
+                  <Package className="mr-2 h-4 w-4" />
+                  {language === 'es' ? 'Mis productos' : 'My Products'}
+                </Button>
+              </>
+            )}
+
             {/* Publish Button (only for vendors) */}
             {isAuthenticated && hasRole('vendor') && (
               <Button 
@@ -116,7 +215,9 @@ const Header = () => {
                 onClick={() => navigate('/vendor/publish')}
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
-                {userType === "products" ? "Publicar Producto" : "Publicar Servicio"}
+                {userType === "products" 
+                  ? (language === 'es' ? "Publicar Producto" : "Publish Product") 
+                  : (language === 'es' ? "Publicar Servicio" : "Publish Service")}
               </Button>
             )}
 
@@ -128,7 +229,19 @@ const Header = () => {
                 onClick={() => navigate('/vendor/become')}
               >
                 <Store className="mr-2 h-4 w-4" />
-                Hazte Vendedor
+                {language === 'es' ? 'Hazte Vendedor' : 'Become Vendor'}
+              </Button>
+            )}
+
+            {/* Favorites Button (only for buyers) */}
+            {isAuthenticated && hasRole('buyer') && (
+              <Button 
+                variant="ghost" 
+                className="text-gray-700 dark:text-gray-300"
+                onClick={() => navigate('/favorites')}
+              >
+                <Heart className="mr-2 h-4 w-4" />
+                {language === 'es' ? 'Favoritos' : 'Favorites'}
               </Button>
             )}
 
@@ -176,27 +289,27 @@ const Header = () => {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
                     <User className="mr-2 h-4 w-4" />
-                    <span>Mi perfil</span>
+                    <span>{language === 'es' ? 'Mi perfil' : 'My Profile'}</span>
                   </DropdownMenuItem>
                   
                   {hasRole('buyer') && !hasRole('vendor') && (
                     <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/vendor/become')}>
                       <Store className="mr-2 h-4 w-4" />
-                      <span>Convertirme en vendedor</span>
+                      <span>{language === 'es' ? 'Convertirme en vendedor' : 'Become Vendor'}</span>
                     </DropdownMenuItem>
                   )}
                   
                   {hasRole('vendor') && (
                     <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/vendor/dashboard')}>
                       <Store className="mr-2 h-4 w-4" />
-                      <span>Mi tienda</span>
+                      <span>{language === 'es' ? 'Mi tienda' : 'My Store'}</span>
                     </DropdownMenuItem>
                   )}
                   
                   {hasRole('admin') && (
                     <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/admin')}>
                       <Shield className="mr-2 h-4 w-4" />
-                      <span>Panel de Administración</span>
+                      <span>{language === 'es' ? 'Panel de Administración' : 'Admin Panel'}</span>
                     </DropdownMenuItem>
                   )}
                   
@@ -204,7 +317,7 @@ const Header = () => {
                   
                   <DropdownMenuItem className="cursor-pointer" onClick={() => logout()}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Cerrar sesión</span>
+                    <span>{language === 'es' ? 'Cerrar sesión' : 'Logout'}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -215,14 +328,14 @@ const Header = () => {
                   className="text-gray-700 dark:text-gray-300"
                   onClick={() => navigate('/login')}
                 >
-                  Ingresar
+                  {language === 'es' ? 'Ingresar' : 'Login'}
                 </Button>
                 <Button 
                   variant="default" 
                   className="bg-barrio-primary hover:bg-barrio-primary-dark"
                   onClick={() => navigate('/register')}
                 >
-                  Registrarse
+                  {language === 'es' ? 'Registrarse' : 'Register'}
                 </Button>
               </div>
             )}
@@ -238,7 +351,7 @@ const Header = () => {
               className="mr-2"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              <Menu className="h-6 w-6" />
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
             <Link to="/" className="flex items-center">
               <div className="font-display font-bold text-xl text-barrio-primary dark:text-barrio-accent">
@@ -250,9 +363,6 @@ const Header = () => {
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={() => navigate('/search')}>
               <Search className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => navigate('/cart')}>
-              <ShoppingBag className="h-5 w-5" />
             </Button>
             {isAuthenticated ? (
               <DropdownMenu>
@@ -267,13 +377,20 @@ const Header = () => {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
                     <User className="mr-2 h-4 w-4" />
-                    <span>Mi perfil</span>
+                    <span>{language === 'es' ? 'Mi perfil' : 'My Profile'}</span>
                   </DropdownMenuItem>
                   
                   {hasRole('vendor') && (
                     <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/vendor/dashboard')}>
                       <Store className="mr-2 h-4 w-4" />
-                      <span>Mi tienda</span>
+                      <span>{language === 'es' ? 'Mi tienda' : 'My Store'}</span>
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {hasRole('admin') && (
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/admin')}>
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      <span>{language === 'es' ? 'Panel Admin' : 'Admin Panel'}</span>
                     </DropdownMenuItem>
                   )}
                   
@@ -281,7 +398,7 @@ const Header = () => {
                   
                   <DropdownMenuItem className="cursor-pointer" onClick={() => logout()}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Cerrar sesión</span>
+                    <span>{language === 'es' ? 'Cerrar sesión' : 'Logout'}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -308,7 +425,7 @@ const Header = () => {
                   className={`rounded-full ${userType === "products" ? "bg-barrio-primary text-white" : "text-gray-600 dark:text-gray-300"}`}
                   onClick={() => setUserType("products")}
                 >
-                  Productos
+                  {language === 'es' ? 'Productos' : 'Products'}
                 </Button>
                 <Button 
                   variant={userType === "services" ? "default" : "ghost"} 
@@ -316,7 +433,7 @@ const Header = () => {
                   className={`rounded-full ${userType === "services" ? "bg-barrio-primary text-white" : "text-gray-600 dark:text-gray-300"}`}
                   onClick={() => setUserType("services")}
                 >
-                  Servicios
+                  {language === 'es' ? 'Servicios' : 'Services'}
                 </Button>
               </div>
 
@@ -331,10 +448,95 @@ const Header = () => {
             </div>
 
             <div className="space-y-3 pb-3">
+              {/* Mobile Navigation Links */}
+              <div className="flex flex-col space-y-2">
+                <Button 
+                  variant="ghost" 
+                  className="justify-start"
+                  onClick={() => {
+                    navigate('/');
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <Home className="mr-2 h-4 w-4" />
+                  {language === 'es' ? 'Inicio' : 'Home'}
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="justify-start"
+                  onClick={() => {
+                    navigate('/vendors');
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <Compass className="mr-2 h-4 w-4" />
+                  {language === 'es' ? 'Explorar' : 'Explore'}
+                </Button>
+                
+                {isAuthenticated && hasRole('buyer') && (
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start"
+                    onClick={() => {
+                      navigate('/favorites');
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    <Heart className="mr-2 h-4 w-4" />
+                    {language === 'es' ? 'Favoritos' : 'Favorites'}
+                  </Button>
+                )}
+                
+                {isAuthenticated && hasRole('vendor') && (
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      className="justify-start"
+                      onClick={() => {
+                        navigate('/vendor/dashboard');
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <Store className="mr-2 h-4 w-4" />
+                      {language === 'es' ? 'Mi tienda' : 'My Store'}
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      className="justify-start"
+                      onClick={() => {
+                        navigate('/vendor/products');
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <Package className="mr-2 h-4 w-4" />
+                      {language === 'es' ? 'Mis productos' : 'My Products'}
+                    </Button>
+                  </>
+                )}
+                
+                {isAuthenticated && hasRole('admin') && (
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start"
+                    onClick={() => {
+                      navigate('/admin');
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    {language === 'es' ? 'Panel Admin' : 'Admin Panel'}
+                  </Button>
+                )}
+              </div>
+
               <div className="w-full">
                 <SearchBar 
                   onSearch={handleSearch} 
-                  placeholder={userType === "products" ? "Buscar productos..." : "Buscar servicios..."}
+                  placeholder={userType === "products" 
+                    ? (language === 'es' ? "Buscar productos..." : "Search products...") 
+                    : (language === 'es' ? "Buscar servicios..." : "Search services...")}
                   initialValue=""
                 />
               </div>
@@ -349,7 +551,9 @@ const Header = () => {
                   }}
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
-                  {userType === "products" ? "Publicar Producto" : "Publicar Servicio"}
+                  {userType === "products" 
+                    ? (language === 'es' ? "Publicar Producto" : "Publish Product") 
+                    : (language === 'es' ? "Publicar Servicio" : "Publish Service")}
                 </Button>
               )}
 
@@ -363,7 +567,7 @@ const Header = () => {
                   }}
                 >
                   <Store className="mr-2 h-4 w-4" />
-                  Hazte Vendedor
+                  {language === 'es' ? 'Hazte Vendedor' : 'Become Vendor'}
                 </Button>
               )}
 
@@ -377,7 +581,7 @@ const Header = () => {
                       setIsMobileMenuOpen(false);
                     }}
                   >
-                    Ingresar
+                    {language === 'es' ? 'Ingresar' : 'Login'}
                   </Button>
                   <Button 
                     variant="default" 
@@ -387,7 +591,7 @@ const Header = () => {
                       setIsMobileMenuOpen(false);
                     }}
                   >
-                    Registrarse
+                    {language === 'es' ? 'Registrarse' : 'Register'}
                   </Button>
                 </div>
               )}
