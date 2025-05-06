@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Sun, Moon, Globe, ShoppingBag, Wrench, Mango, Sandwich, Phone, Lightbulb, GraduationCap } from 'lucide-react';
+import { Sun, Moon, Globe, ShoppingBag, Wrench, Apple, Sandwich, Phone, Lightbulb, GraduationCap } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { PalmLeaf } from '@/components/illustrations/PalmLeaf';
 import { FruitBubble } from '@/components/illustrations/FruitBubble';
@@ -41,7 +41,7 @@ const Index = () => {
           {isAuthenticated ? (
             <Link to="/profile">
               <Avatar>
-                <AvatarImage src={user?.avatar_url || ""} alt={user?.name || "User"} />
+                <AvatarImage src={user?.name ? `/avatars/${user.name[0].toUpperCase()}.png` : ""} alt={user?.name || "User"} />
                 <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
               </Avatar>
             </Link>
@@ -81,7 +81,7 @@ const Index = () => {
             <Link to="/vendors" className="col-span-1">
               <div className="bg-tropical-yellow text-tropical-dark rounded-xl p-4 h-full flex flex-col items-center justify-center gap-2 hover:scale-105 transition-transform shadow-lg">
                 <div className="bg-tropical-dark/10 p-3 rounded-full">
-                  <Mango className="w-8 h-8" />
+                  <Apple className="w-8 h-8" />
                 </div>
                 <span className="font-bold text-lg mt-2">Explorar Productos</span>
               </div>
@@ -110,7 +110,7 @@ const Index = () => {
           <div className="grid grid-cols-5 gap-3 max-w-2xl mx-auto mb-6">
             <div className="flex flex-col items-center">
               <div className="bg-tropical-yellow p-3 rounded-full mb-2 hover:scale-110 transition-transform">
-                <Mango className="w-6 h-6 text-tropical-dark" />
+                <Apple className="w-6 h-6 text-tropical-dark" />
               </div>
               <span className="text-xs text-white/90">Frutas y verduras</span>
             </div>
