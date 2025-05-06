@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PenLine, Plus, Trash2, Check, X, Settings, Upload } from 'lucide-react';
@@ -957,4 +958,13 @@ const VendorManage = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          </
+          </Tabs>
+        </div>
+      </main>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default VendorManage;
