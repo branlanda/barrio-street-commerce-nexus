@@ -166,7 +166,7 @@ const Header = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 pl-2 pr-1 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user?.avatar || undefined} alt={user?.name || 'User'} />
+                      <AvatarImage src={undefined} alt={user?.name || 'User'} />
                       <AvatarFallback>{getInitials()}</AvatarFallback>
                     </Avatar>
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{user?.name}</span>
@@ -259,7 +259,7 @@ const Header = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user?.avatar || undefined} alt={user?.name || 'User'} />
+                      <AvatarImage src={undefined} alt={user?.name || 'User'} />
                       <AvatarFallback>{getInitials()}</AvatarFallback>
                     </Avatar>
                   </Button>
